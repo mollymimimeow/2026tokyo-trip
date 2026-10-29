@@ -655,6 +655,43 @@
             return '';
         }
 
+        
+        function autoFixHeaders(dataArray) {
+            if (!dataArray || dataArray.length === 0) return dataArray;
+            // 檢查第一筆資料的值，是否剛好是我們預期的表頭（代表表頭被擠到資料列了）
+            let firstRowValues = Object.values(dataArray[0]);
+            let looksLikeHeader = false;
+            let dateKey = '';
+            for (let val of firstRowValues) {
+                let v = String(val).trim();
+                if (v === '日期' || v === 'Date') {
+                    looksLikeHeader = true;
+                    break;
+                }
+            }
+            
+            if (looksLikeHeader) {
+                console.log("偵測到表頭偏移，自動修正中...");
+                let newHeaders = dataArray[0];
+                let fixedData = [];
+                for (let i = 1; i < dataArray.length; i++) {
+                    let oldRow = dataArray[i];
+                    let newRow = {};
+                    for (let key in oldRow) {
+                        let newKey = newHeaders[key];
+                        if (newKey && String(newKey).trim() !== '') {
+                            newRow[newKey] = oldRow[key];
+                        } else {
+                            newRow[key] = oldRow[key];
+                        }
+                    }
+                    fixedData.push(newRow);
+                }
+                return fixedData;
+            }
+            return dataArray;
+        }
+
         function processData() {
             uniqueDates = [];
             uniqueMembers = new Set();
