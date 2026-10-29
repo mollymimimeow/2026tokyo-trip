@@ -326,7 +326,7 @@
         <div class="header">
             <svg class="header-leaf leaf-1" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L17 14L18 20L12 17L6 20L7 14L3 9L9 8L12 2Z"/></svg>
             <svg class="header-leaf leaf-2" viewBox="0 0 24 24"><path d="M12 2C12 2 15 6 15 9C15 12 12 15 12 15C12 15 9 12 9 9C9 6 12 2 12 2Z"/></svg>
-            <h1>2026 東京秋日之旅</h1>
+            <h1>2026 東京秋日之旅 <span style='font-size:10px; color:#fff;'>v1.6</span></h1>
             <p>Tokyo Autumn Trip 🍁</p>
         </div>
 
@@ -532,17 +532,17 @@
 
         function initData() {
             Promise.all([
-                new Promise((res, rej) => Papa.parse(CSV_URL, {
+                new Promise((res, rej) => Papa.parse(CSV_URL + '&t=' + Date.now(), {
                     download: true, header: true, skipEmptyLines: true,
                     transformHeader: h => h.trim().replace(/^\ufeff/, ''),
                     complete: res, error: rej
                 })),
-                new Promise((res, rej) => Papa.parse(HOTEL_CSV_URL, {
+                new Promise((res, rej) => Papa.parse(HOTEL_CSV_URL + '&t=' + Date.now(), {
                     download: true, header: true, skipEmptyLines: true,
                     transformHeader: h => h.trim().replace(/^\ufeff/, ''),
                     complete: res, error: rej
                 })),
-                new Promise((res, rej) => Papa.parse(FLIGHT_CSV_URL, {
+                new Promise((res, rej) => Papa.parse(FLIGHT_CSV_URL + '&t=' + Date.now(), {
                     download: true, header: true, skipEmptyLines: true,
                     transformHeader: h => h.trim().replace(/^\ufeff/, ''),
                     complete: res, error: rej
@@ -719,13 +719,17 @@
             
             if (!currentDate && uniqueDates.length > 0) currentDate = uniqueDates[0];
             if (!currentDate) {
-                let debugInfo = "試算表內找不到符合的日期或參與者欄位。";
-                if (allData.length > 0) {
-                    debugInfo += "<br><br><b>目前讀取到的欄位名稱為：</b><br>" + Object.keys(allData[0]).join(', ');
+                let debugInfo = "【系統自動偵測報告】<br>無法從試算表找到對應的行程。<br>";
+                debugInfo += "1. 行程表網址是否給錯？<br>";
+                if (allData.length === 0) {
+                    debugInfo += "2. 試算表目前是空的，或是沒有發布成功。<br>";
+                } else {
+                    debugInfo += "2. 目前讀取到的表頭名稱為：<br><b style='color:#3D405B;'>" + Object.keys(allData[0]).join(', ') + "</b><br>";
+                    debugInfo += "（如果看到的是「航班、起飛時間」，代表你貼成航班表了！）";
                 }
-                container.innerHTML = `<div style="text-align:center; padding: 40px; color:#8187A1; line-height: 1.6;">
-                    <div style="font-weight:900; margin-bottom:10px; font-size:16px;">讀取中或試算表尚無行程日期</div>
-                    <div style="font-size:13px; color:#E07A5F;">${debugInfo}</div>
+                container.innerHTML = `<div style="text-align:center; padding: 20px; color:#8187A1; line-height: 1.6; background:#FFF4F0; border-radius:16px; margin:20px; border:2px dashed #E07A5F;">
+                    <div style="font-weight:900; margin-bottom:10px; font-size:16px; color:#E07A5F;">⚠️ 讀取失敗</div>
+                    <div style="font-size:13px; color:#E07A5F; text-align:left;">${debugInfo}</div>
                 </div>`;
                 return;
             }
