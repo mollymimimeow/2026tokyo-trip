@@ -719,7 +719,14 @@
             
             if (!currentDate && uniqueDates.length > 0) currentDate = uniqueDates[0];
             if (!currentDate) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8187A1; font-weight:900;">讀取中或試算表尚無行程日期</div>';
+                let debugInfo = "試算表內找不到符合的日期或參與者欄位。";
+                if (allData.length > 0) {
+                    debugInfo += "<br><br><b>目前讀取到的欄位名稱為：</b><br>" + Object.keys(allData[0]).join(', ');
+                }
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color:#8187A1; line-height: 1.6;">
+                    <div style="font-weight:900; margin-bottom:10px; font-size:16px;">讀取中或試算表尚無行程日期</div>
+                    <div style="font-size:13px; color:#E07A5F;">${debugInfo}</div>
+                </div>`;
                 return;
             }
             
