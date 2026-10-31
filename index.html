@@ -23,131 +23,141 @@
             --text-light: #94A3B8; 
             --card-bg: rgba(255, 255, 255, 0.05); 
             --card-border: rgba(255, 255, 255, 0.1);
-            --border-radius: 16px;
-            --safe-bottom: env(safe-area-inset-bottom, 20px);
+            --border-radius: 12px;
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: calc(90px + var(--safe-bottom)); overflow-x: hidden; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: calc(80px + var(--safe-bottom)); overflow-x: hidden; font-size: 14px; }
         .app-container { max-width: 600px; margin: 0 auto; min-height: 100vh; background-color: transparent; position: relative; }
 
         .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; background: radial-gradient(circle at 50% 0%, #1a2a6c, #112 70%); }
-        .snow { position: absolute; top: -10%; color: white; font-size: 1em; text-shadow: 0 0 5px rgba(255,255,255,0.8); animation: fall linear infinite; opacity: 0; }
+        .snow { position: absolute; top: -10%; color: white; font-size: 0.8em; text-shadow: 0 0 4px rgba(255,255,255,0.8); animation: fall linear infinite; opacity: 0; }
         @keyframes fall { 0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.5; } 100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; } }
         
-        .header { background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.95)); color: white; padding: 55px 20px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 2; border-bottom: 2px solid var(--accent-gold); }
-        .header::before { content: '✨ 🎄 🎁 🔔 ❄️'; position: absolute; top: 15px; left: 0; right: 0; font-size: 16px; letter-spacing: 20px; opacity: 0.6; animation: twinkle 3s infinite alternate; }
-        @keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 0.9; text-shadow: 0 0 10px var(--accent-gold); } }
-        .header h1 { font-size: 28px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(253, 216, 53, 0.4); }
-        .header p { font-size: 13px; opacity: 0.9; position: relative; z-index: 2; color: #FFCDD2; font-weight: 700; }
-        .user-badge { position: absolute; top: 16px; right: 20px; z-index: 10; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); color: white; }
+        .header { background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.95)); color: white; padding: 45px 16px 20px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.5); z-index: 2; border-bottom: 2px solid var(--accent-gold); }
+        .header::before { content: '✨ 🎄 🎁 🔔 ❄️'; position: absolute; top: 12px; left: 0; right: 0; font-size: 14px; letter-spacing: 16px; opacity: 0.6; animation: twinkle 3s infinite alternate; }
+        @keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 0.9; text-shadow: 0 0 8px var(--accent-gold); } }
+        .header h1 { font-size: 22px; font-weight: 900; margin-bottom: 6px; letter-spacing: 1px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 12px rgba(253, 216, 53, 0.4); }
+        .header p { font-size: 12px; opacity: 0.9; position: relative; z-index: 2; color: #FFCDD2; font-weight: 700; }
+        .user-badge { position: absolute; top: 12px; right: 16px; z-index: 10; background: rgba(0,0,0,0.3); padding: 4px 10px; border-radius: 16px; font-size: 11px; font-weight: 900; cursor: pointer; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); color: white; }
 
-        .view-section { display: none; animation: fadeIn 0.3s ease; position: relative; z-index: 1; }
+        .view-section { display: none; animation: fadeIn 0.2s ease; position: relative; z-index: 1; }
         .view-section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-        .filter-container { display: flex; overflow-x: auto; gap: 10px; padding: 16px 20px 8px; scrollbar-width: none; }
+        .filter-container { display: flex; overflow-x: auto; gap: 8px; padding: 12px 16px 6px; scrollbar-width: none; }
         .filter-container::-webkit-scrollbar { display: none; }
-        .filter-btn { background-color: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--card-border); padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(4px); }
-        .filter-btn.active { background-color: var(--primary-color); color: white; border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(211, 47, 47, 0.4); }
+        .filter-btn { background-color: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--card-border); padding: 6px 14px; border-radius: 16px; font-size: 13px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(4px); }
+        .filter-btn.active { background-color: var(--primary-color); color: white; border-color: var(--accent-gold); box-shadow: 0 0 12px rgba(211, 47, 47, 0.4); }
 
-        .date-tabs { display: flex; overflow-x: auto; gap: 12px; padding: 12px 20px 20px; scrollbar-width: none; }
+        .date-tabs { display: flex; overflow-x: auto; gap: 10px; padding: 10px 16px 16px; scrollbar-width: none; }
         .date-tabs::-webkit-scrollbar { display: none; }
-        .date-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 65px; height: 75px; background-color: rgba(255,255,255,0.05); border-radius: 16px; color: var(--text-light); cursor: pointer; transition: all 0.2s ease; border: 1px solid var(--card-border); backdrop-filter: blur(4px); }
-        .date-tab span.day { font-size: 12px; margin-bottom: 4px; font-weight: 500; }
-        .date-tab span.date { font-size: 20px; font-weight: 900; }
-        .date-tab.active { background-color: var(--secondary-color); color: white; border-color: var(--accent-gold); transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 142, 60, 0.4); }
+        .date-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 55px; height: 65px; background-color: rgba(255,255,255,0.05); border-radius: 12px; color: var(--text-light); cursor: pointer; transition: all 0.2s ease; border: 1px solid var(--card-border); backdrop-filter: blur(4px); }
+        .date-tab span.day { font-size: 11px; margin-bottom: 2px; font-weight: 500; }
+        .date-tab span.date { font-size: 18px; font-weight: 900; }
+        .date-tab.active { background-color: var(--secondary-color); color: white; border-color: var(--accent-gold); transform: scale(1.05); box-shadow: 0 0 12px rgba(56, 142, 60, 0.4); }
 
-        .itinerary-container { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 16px; }
+        .itinerary-container { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 12px; }
         
-        .card { border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); position: relative; margin-bottom: 4px; display: flex; background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.2); }
-        .drag-handle { width: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); cursor: grab; color: #64748B; font-size: 20px; border-right: 1px solid rgba(255,255,255,0.05); touch-action: none; }
+        .card { border-radius: 16px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); position: relative; margin-bottom: 2px; display: flex; background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.2); }
+        .drag-handle { width: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); cursor: grab; color: #64748B; font-size: 16px; border-right: 1px solid rgba(255,255,255,0.05); touch-action: none; }
         .drag-handle:active { cursor: grabbing; background: rgba(255,255,255,0.08); }
         
-        .card-inner { flex-grow: 1; padding: 18px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
-        .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10; }
-        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: white; backdrop-filter: blur(4px); }
-        .card-watermark { position: absolute; right: -5px; bottom: -15px; font-size: 100px; opacity: 0.15; z-index: 0; pointer-events: none; transform: rotate(-15deg); filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
+        .card-inner { flex-grow: 1; padding: 14px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .card-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 10; }
+        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; color: white; backdrop-filter: blur(4px); }
+        .card-watermark { position: absolute; right: -5px; bottom: -10px; font-size: 80px; opacity: 0.15; z-index: 0; pointer-events: none; transform: rotate(-15deg); filter: drop-shadow(0 0 8px rgba(255,255,255,0.1)); }
 
-        .theme-food { border-left: 6px solid #FF9800 !important; }
+        .theme-food { border-left: 4px solid #FF9800 !important; }
         .theme-food .time-badge { background: rgba(255, 152, 0, 0.2); color: #FFB74D; border: 1px solid rgba(255, 152, 0, 0.3);}
-        .theme-attraction { border-left: 6px solid #4CAF50 !important; }
+        .theme-attraction { border-left: 4px solid #4CAF50 !important; }
         .theme-attraction .time-badge { background: rgba(76, 175, 80, 0.2); color: #81C784; border: 1px solid rgba(76, 175, 80, 0.3);}
-        .theme-transport { border-left: 6px solid #29B6F6 !important; }
+        .theme-transport { border-left: 4px solid #29B6F6 !important; }
         .theme-transport .time-badge { background: rgba(41, 182, 246, 0.2); color: #81D4FA; border: 1px solid rgba(41, 182, 246, 0.3);}
-        .theme-hotel { border-left: 6px solid #BA68C8 !important; }
+        .theme-hotel { border-left: 4px solid #BA68C8 !important; }
         .theme-hotel .time-badge { background: rgba(186, 104, 200, 0.2); color: #CE93D8; border: 1px solid rgba(186, 104, 200, 0.3);}
-        .theme-shop { border-left: 6px solid #F06292 !important; }
+        .theme-shop { border-left: 4px solid #F06292 !important; }
         .theme-shop .time-badge { background: rgba(240, 98, 146, 0.2); color: #F48FB1; border: 1px solid rgba(240, 98, 146, 0.3);}
-        .theme-default { border-left: 6px solid var(--primary-color) !important; }
+        .theme-default { border-left: 4px solid var(--primary-color) !important; }
         .theme-default .time-badge { background: rgba(211, 47, 47, 0.2); color: #EF5350; border: 1px solid rgba(211, 47, 47, 0.3);}
 
-        .time-badge { font-size: 13px; padding: 5px 12px; border-radius: 12px; display: inline-block; font-weight: 900; margin-bottom: 10px; align-self: flex-start;}
-        .card-title { font-size: 19px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: white; padding-right: 60px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 1;}
-        .card-note { background: rgba(0,0,0,0.3); padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: #CBD0E1; line-height: 1.5; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); z-index: 1;}
-        .tag-pill { font-size: 12px; color: #FFF; background: rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
-        .map-btn { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 900; margin-top: 4px; border: 1px solid rgba(255,255,255,0.2); z-index: 1;}
-        .map-btn svg { width: 18px; height: 18px; margin-right: 8px; fill: var(--accent-gold); filter: drop-shadow(0 0 2px var(--accent-gold));}
+        .time-badge { font-size: 11px; padding: 4px 10px; border-radius: 10px; display: inline-block; font-weight: 900; margin-bottom: 8px; align-self: flex-start;}
+        .card-title { font-size: 16px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: white; padding-right: 50px; text-shadow: 0 2px 3px rgba(0,0,0,0.5); z-index: 1;}
+        .card-note { padding: 0; font-size: 13px; color: #E2E8F0; line-height: 1.5; margin-bottom: 12px; z-index: 1;}
+        .tag-pill { font-size: 11px; color: #FFF; background: rgba(255,255,255,0.15); padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
+        .map-btn { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 900; margin-top: 4px; border: 1px solid rgba(255,255,255,0.2); z-index: 1;}
+        .map-btn svg { width: 16px; height: 16px; margin-right: 6px; fill: var(--accent-gold); filter: drop-shadow(0 0 2px var(--accent-gold));}
 
-        .fab { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.6), 0 0 0 2px var(--accent-gold); cursor: pointer; z-index: 90; transition: transform 0.2s; }
-        .fab::after { content: '🎁'; position: absolute; font-size: 28px; }
+        .fab { position: fixed; bottom: 85px; right: 16px; width: 52px; height: 52px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.6), 0 0 0 2px var(--accent-gold); cursor: pointer; z-index: 90; transition: transform 0.2s; }
+        .fab::after { content: '🎁'; position: absolute; font-size: 24px; }
         .fab:active { transform: scale(0.9) rotate(10deg); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: flex-end; z-index: 100; backdrop-filter: blur(5px); padding-top: 50px; }
-        .modal-box { background: #1E293B; padding: 24px; border-top-left-radius: 24px; border-top-right-radius: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); color: white; animation: slideUp 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: flex-end; z-index: 100; backdrop-filter: blur(5px); padding-top: 40px; }
+        .modal-box { background: #1E293B; padding: 20px; border-top-left-radius: 20px; border-top-right-radius: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -8px 30px rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); color: white; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .modal-box h3 { margin-bottom: 18px; font-weight: 900; color: white; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
-        .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; font-size: 13px; font-weight: 900; color: #94A3B8; margin-bottom: 6px; }
-        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 14px; background: rgba(0,0,0,0.3); color: white; font-family: inherit; }
+        .modal-box h3 { margin-bottom: 16px; font-weight: 900; color: white; font-size: 18px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;}
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 900; color: #94A3B8; margin-bottom: 4px; }
+        
+        /* Auto-resizing textarea class */
+        .auto-resize { overflow: hidden; resize: none; min-height: 40px; }
+        
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px; background: rgba(0,0,0,0.3); color: white; font-family: inherit; }
         .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: 2px solid var(--accent-gold); }
-        .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;}
-        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary-color); cursor:pointer;}
-        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; position: sticky; bottom: 0; background: #1E293B; padding-top: 15px; padding-bottom: 10px; border-top: 1px solid rgba(255,255,255,0.1);}
-        .btn-cancel { padding: 12px 20px; border: none; background: rgba(255,255,255,0.1); border-radius: 10px; color: white; font-weight: 900; cursor: pointer; flex: 1;}
-        .btn-save { padding: 12px 20px; border: none; background: var(--primary-color); border-radius: 10px; color: white; font-weight: 900; cursor: pointer; flex: 2; box-shadow: 0 4px 10px rgba(211,47,47,0.4);}
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;}
+        .checkbox-item input { width: 16px; height: 16px; accent-color: var(--primary-color); cursor:pointer;}
+        
+        /* Custom styled multi-select tags */
+        .tag-select-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tag-select-item { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; transition: 0.2s; user-select: none; }
+        .tag-select-item input { display: none; }
+        .tag-select-item:has(input:checked) { background: var(--primary-color); border-color: var(--accent-gold); box-shadow: 0 0 8px rgba(211, 47, 47, 0.4); }
 
-        .identity-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px;}
-        .identity-btn { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 16px; font-size: 18px; font-weight: 900; color: white; cursor: pointer; transition: 0.2s;}
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; position: sticky; bottom: 0; background: #1E293B; padding-top: 12px; padding-bottom: 8px; border-top: 1px solid rgba(255,255,255,0.1);}
+        .btn-cancel { padding: 10px 16px; border: none; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; font-weight: 900; cursor: pointer; flex: 1; font-size:13px;}
+        .btn-save { padding: 10px 16px; border: none; background: var(--primary-color); border-radius: 8px; color: white; font-weight: 900; cursor: pointer; flex: 2; box-shadow: 0 4px 8px rgba(211,47,47,0.4); font-size:13px;}
+
+        .identity-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 16px;}
+        .identity-btn { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; font-size: 16px; font-weight: 900; color: white; cursor: pointer; transition: 0.2s;}
         .identity-btn:active { background: var(--primary-color); border-color: var(--accent-gold); transform: scale(0.95);}
 
-        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 10px var(--safe-bottom); z-index: 50; border-top-left-radius: 24px; border-top-right-radius: 24px; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748B; font-size: 11px; font-weight: 900; gap: 6px; cursor: pointer; transition: 0.3s; flex: 1; padding: 6px 0; text-align: center; }
-        .nav-item.active { color: var(--accent-gold); text-shadow: 0 0 10px rgba(253, 216, 53, 0.5); }
-        .nav-icon { font-size: 22px; transition: transform 0.2s; filter: grayscale(100%) opacity(0.5);}
-        .nav-item.active .nav-icon { transform: translateY(-3px) scale(1.1); filter: grayscale(0%) opacity(1);}
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 10px 8px var(--safe-bottom); z-index: 50; border-top-left-radius: 20px; border-top-right-radius: 20px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748B; font-size: 10px; font-weight: 900; gap: 4px; cursor: pointer; transition: 0.3s; flex: 1; padding: 4px 0; text-align: center; }
+        .nav-item.active { color: var(--accent-gold); text-shadow: 0 0 8px rgba(253, 216, 53, 0.5); }
+        .nav-icon { font-size: 20px; transition: transform 0.2s; filter: grayscale(100%) opacity(0.5);}
+        .nav-item.active .nav-icon { transform: translateY(-2px) scale(1.1); filter: grayscale(0%) opacity(1);}
         
-        .list-tabs { display: flex; padding: 20px 20px 0; gap: 10px; }
-        .list-tab-btn { flex: 1; padding: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 12px; font-size: 15px; font-weight: 900; color: var(--text-light); cursor: pointer;}
+        .list-tabs { display: flex; padding: 16px 16px 0; gap: 8px; }
+        .list-tab-btn { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 13px; font-weight: 900; color: var(--text-light); cursor: pointer;}
         .list-tab-btn.active { background: var(--secondary-color); color: white; border-color: var(--accent-gold);}
-        .sub-view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .sub-view { display: none; padding: 16px; animation: fadeIn 0.2s ease; }
         .sub-view.active { display: block; }
-        #loading { text-align: center; padding: 40px; color: white; font-weight: 700; line-height: 1.6;}
-        .private-banner { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #E2E8F0; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px; display: flex; align-items: center; gap: 8px; }
+        #loading { text-align: center; padding: 30px; color: white; font-weight: 700; line-height: 1.6; font-size:13px;}
+        .private-banner { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #E2E8F0; padding:10px; border-radius:10px; font-size:12px; font-weight:900; margin-bottom:12px; display: flex; align-items: center; gap: 6px; }
         [data-netlify-deploy-id], #netlify-drawer, .netlify-badge { display: none !important; }
         
-        /* 機票樣式 */
-        .flight-card { background: rgba(255,255,255,0.05); border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
-        .flight-card-header { background: rgba(0,0,0,0.5); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2);}
-        .flight-card-body { padding: 20px; position: relative; }
-        .flight-route { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;}
-        .flight-route::after { content: ''; position: absolute; left: 60px; right: 60px; top: 22px; border-top: 2px dashed rgba(255,255,255,0.2); z-index: 0; }
-        .plane-icon { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); background: #1E293B; padding: 0 10px; z-index: 1; font-size: 18px;}
-        .flight-port { text-align: center; z-index: 1; background: #1E293B; padding: 0 5px;}
-        .flight-port h2 { font-size: 32px; font-weight: 900; color: var(--accent-gold); margin-bottom: 2px; line-height: 1;}
-        .flight-port p { font-size: 12px; color: var(--text-light); font-weight: 900;}
-        .flight-info-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 12px; margin-bottom: 12px;}
+        .flight-card { background: rgba(255,255,255,0.05); border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 20px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        .flight-card-header { background: rgba(0,0,0,0.5); color: white; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2);}
+        .flight-card-body { padding: 16px; position: relative; }
+        .flight-route { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; position: relative;}
+        .flight-route::after { content: ''; position: absolute; left: 50px; right: 50px; top: 18px; border-top: 2px dashed rgba(255,255,255,0.2); z-index: 0; }
+        .plane-icon { position: absolute; left: 50%; top: 9px; transform: translateX(-50%); background: #1E293B; padding: 0 8px; z-index: 1; font-size: 16px;}
+        .flight-port { text-align: center; z-index: 1; background: #1E293B; padding: 0 4px;}
+        .flight-port h2 { font-size: 26px; font-weight: 900; color: var(--accent-gold); margin-bottom: 2px; line-height: 1;}
+        .flight-port p { font-size: 11px; color: var(--text-light); font-weight: 900;}
+        .flight-info-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px 14px; border-radius: 10px; margin-bottom: 10px;}
         .flight-info-col { display: flex; flex-direction: column; flex: 1;}
-        .flight-info-col label { font-size: 11px; color: var(--text-light); margin-bottom: 2px; font-weight: 700;}
-        .flight-info-col span { font-size: 15px; font-weight: 900; color: white; }
+        .flight-info-col label { font-size: 10px; color: var(--text-light); margin-bottom: 2px; font-weight: 700;}
+        .flight-info-col span { font-size: 13px; font-weight: 900; color: white; }
         
-        .add-btn-large { width: 100%; padding: 14px; background: var(--secondary-color); color: white; border: 1px solid var(--accent-gold); border-radius: 12px; font-size: 15px; font-weight: 900; margin-bottom: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(56, 142, 60, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .item-card { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: flex-start; gap: 12px; }
-        .item-checkbox { margin-top: 4px; width: 22px; height: 22px; accent-color: var(--secondary-color); flex-shrink: 0; }
-        .item-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 6px; }
+        .add-btn-large { width: 100%; padding: 12px; background: var(--secondary-color); color: white; border: 1px solid var(--accent-gold); border-radius: 10px; font-size: 13px; font-weight: 900; margin-bottom: 16px; cursor: pointer; box-shadow: 0 4px 8px rgba(56, 142, 60, 0.3); display: flex; justify-content: center; align-items: center; gap: 6px; }
+        .item-card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 14px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: flex-start; gap: 10px; }
+        .item-checkbox { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--secondary-color); flex-shrink: 0; }
+        .item-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 4px; }
         .item-title.done { text-decoration: line-through; color: #64748B; }
-        .category-header h3 { font-size: 17px; font-weight: 900; color: var(--accent-gold); }
+        .category-header h3 { font-size: 15px; font-weight: 900; color: var(--accent-gold); }
     </style>
 </head>
 <body>
@@ -177,8 +187,8 @@
                 <button class="list-tab-btn" onclick="switchSubView('view-flights', 'hotels-list', this)">🏨 飯店資訊</button>
             </div>
             <div id="sub-flights-list" class="sub-view active" style="padding-top:0;">
-                <div class="filter-container" id="flight-filter-container" style="padding: 16px 20px 8px;"></div>
-                <div class="flights-container" id="flights-ticket-container" style="padding-top: 10px;"></div>
+                <div class="filter-container" id="flight-filter-container" style="padding: 12px 16px 6px;"></div>
+                <div class="flights-container" id="flights-ticket-container" style="padding-top: 8px;"></div>
             </div>
             <div id="sub-hotels-list" class="sub-view">
                 <div class="flights-container" id="hotel-info-container"></div>
@@ -187,7 +197,7 @@
 
         <!-- ================= 購買清單 ================= -->
         <div id="view-shopping" class="view-section">
-            <div style="padding:20px;">
+            <div style="padding:16px;">
                 <div class="private-banner">🎁 這是你的私人聖誕購物願望清單</div>
                 <button class="add-btn-large" onclick="addCategory('shop', '輸入分類名稱')">➕ 新增購物分類</button>
                 <div id="shopping-list-container"></div>
@@ -225,7 +235,7 @@
     <div class="modal-overlay" id="identity-modal">
         <div class="modal-box">
             <h3>🎅 歡迎！請問你是哪位旅伴？</h3>
-            <p style="font-size:13px; color:var(--text-light); margin-bottom:10px;">系統將為你掛上專屬的聖誕襪與行程。</p>
+            <p style="font-size:12px; color:var(--text-light); margin-bottom:10px;">系統將為你掛上專屬的聖誕襪與行程。</p>
             <div class="identity-grid" id="identity-grid"></div>
         </div>
     </div>
@@ -235,7 +245,7 @@
             <h3 id="iti-modal-title">新增行程</h3>
             <input type="hidden" id="iti-id">
             <div class="input-group"><label>行程名稱 (必填)</label><input type="text" id="iti-title" placeholder="例如：去六本木看聖誕燈飾"></div>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:8px;">
                 <div class="input-group" style="flex:1;"><label>日期</label>
                     <select id="iti-date">
                         <option value="11/14">11/14 (六)</option><option value="11/15">11/15 (日)</option><option value="11/16">11/16 (一)</option>
@@ -247,25 +257,27 @@
                     <select id="iti-period"><option value="早餐">早餐</option><option value="上午">上午</option><option value="午餐">午餐</option><option value="下午">下午</option><option value="晚餐">晚餐</option><option value="晚上">晚上</option></select>
                 </div>
             </div>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:8px;">
                 <div class="input-group" style="flex:1;"><label>開始時間</label><input type="time" id="iti-start"></div>
                 <div class="input-group" style="flex:1;"><label>結束時間</label><input type="time" id="iti-end"></div>
             </div>
             <div class="input-group">
                 <label>主題標籤 (可複選)</label>
-                <div class="checkbox-grid" id="iti-tag-grid">
-                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🛍️ 逛的"> 🛍️ 逛的</label>
-                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🍣 吃的"> 🍣 吃的</label>
-                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🧸 玩的"> 🧸 玩的</label>
-                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🗼 看的"> 🗼 看的</label>
-                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🚗 其他"> 🚗 其他</label>
+                <div class="tag-select-grid">
+                    <label class="tag-select-item"><input type="checkbox" name="iti-tag" value="🛍️ 逛的"> 🛍️ 逛的</label>
+                    <label class="tag-select-item"><input type="checkbox" name="iti-tag" value="🍣 吃的"> 🍣 吃的</label>
+                    <label class="tag-select-item"><input type="checkbox" name="iti-tag" value="🧸 玩的"> 🧸 玩的</label>
+                    <label class="tag-select-item"><input type="checkbox" name="iti-tag" value="🗼 看的"> 🗼 看的</label>
+                    <label class="tag-select-item"><input type="checkbox" name="iti-tag" value="🚗 其他"> 🚗 其他</label>
                 </div>
             </div>
-            <div class="input-group"><label>參與成員 (可複選)</label><div class="checkbox-grid" id="iti-pax-grid"></div></div>
+            <div class="input-group"><label>參與成員 (可複選)</label>
+                <div class="tag-select-grid" id="iti-pax-grid"></div>
+            </div>
             <div class="input-group"><label>Google Map 連結</label><input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/..."></div>
-            <div class="input-group"><label>交通路線</label><textarea id="iti-traffic" rows="2" placeholder="搭乘地鐵..."></textarea></div>
-            <div class="input-group"><label>行程筆記與細項</label><textarea id="iti-notes" rows="2" placeholder="記得帶..."></textarea></div>
-            <div class="input-group"><label>相關連結</label><textarea id="iti-links" rows="2" placeholder="餐廳官網網址..."></textarea></div>
+            <div class="input-group"><label>行程內容</label><textarea class="auto-resize" id="iti-notes" placeholder="記得帶..."></textarea></div>
+            <div class="input-group"><label>細項與筆記 (交通路線/其他備註)</label><textarea class="auto-resize" id="iti-traffic" placeholder="搭乘地鐵..."></textarea></div>
+            <div class="input-group"><label>相關連結 (多個連結請換行)</label><textarea class="auto-resize" id="iti-links" placeholder="餐廳官網網址..."></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button><button class="btn-save" onclick="saveItinerary()">送出願望</button></div>
         </div>
     </div>
@@ -275,7 +287,7 @@
             <h3>新增待辦事項</h3>
             <div class="input-group"><label>待辦事項 (必填)</label><input type="text" id="todoTask"></div>
             <div class="input-group"><label>截止日期 (選填)</label><input type="date" id="todoDate"></div>
-            <div class="input-group"><label>備註 (選填)</label><textarea id="todoNote" rows="2"></textarea></div>
+            <div class="input-group"><label>備註 (選填)</label><textarea class="auto-resize" id="todoNote"></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('todoModal')">取消</button><button class="btn-save" onclick="saveTodo()">儲存</button></div>
         </div>
     </div>
@@ -292,6 +304,16 @@
     </div>
 
     <script>
+        // Auto-resize textarea function
+        document.addEventListener('input', function (event) {
+            if (event.target.tagName.toLowerCase() !== 'textarea') return;
+            autoResize(event.target);
+        }, false);
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = (el.scrollHeight + 2) + 'px';
+        }
+
         const snowContainer = document.getElementById('snow-container');
         const emojis = ['❄️', '⭐', '✨'];
         for (let i = 0; i < 30; i++) {
@@ -299,7 +321,7 @@
             s.className = 'snow'; s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             s.style.left = Math.random() * 100 + 'vw';
             s.style.animationDuration = (Math.random() * 5 + 5) + 's'; s.style.animationDelay = (Math.random() * 5) + 's';
-            s.style.fontSize = (Math.random() * 10 + 10) + 'px'; snowContainer.appendChild(s);
+            s.style.fontSize = (Math.random() * 10 + 8) + 'px'; snowContainer.appendChild(s);
         }
 
         const firebaseConfig = {
@@ -313,7 +335,7 @@
 
         let db; let currentUserIdentity = null; let globalItinerary = {}; let currentFilter = 'all'; let currentDate = '11/14'; let sortableInstance = null;
         let shoppingData = []; let luggageData = []; let todoData = []; let hotelDataCache = []; let parsedFlights = [];
-        let flightCombinedData = []; // 為了合併去回程而新增的結構
+        let flightCombinedData = [];
 
         const CHECKOUT_SCHEDULE = [
             { date: '11/17', time: '11:00', name: '相鐵 FRESA INN' }, { date: '11/18', time: '10:00', name: '富士暁月湖凪Konagi' },
@@ -362,7 +384,7 @@
                 let btn = document.createElement('button'); btn.className = 'identity-btn'; btn.innerText = m;
                 btn.onclick = () => { localStorage.setItem('tokyo_identity_26', m); currentUserIdentity = m; document.getElementById('identity-modal').style.display = 'none'; startApp(); };
                 grid.appendChild(btn);
-                paxGrid.innerHTML += `<label class="checkbox-item"><input type="checkbox" name="iti-pax" value="${m}"> ${m}</label>`;
+                paxGrid.innerHTML += `<label class="tag-select-item"><input type="checkbox" name="iti-pax" value="${m}"> ${m}</label>`;
             });
         }
 
@@ -373,7 +395,6 @@
             document.getElementById('loading').innerText = '正在從聖誕雲端載入行程資料...';
             document.getElementById('loading').style.display = 'block';
 
-            // 調整過濾器，讓自己排在最前面
             currentFilter = currentUserIdentity;
             renderFlightFilters();
             renderFlightsTab();
@@ -401,7 +422,6 @@
         function updateFiltersAndTabs() {
             const fContainer = document.getElementById('filter-container'); const dContainer = document.getElementById('date-tabs');
             
-            // 讓自己排第一個，然後是全員，再來是其他人
             fContainer.innerHTML = '';
             let sortedMembers = [currentUserIdentity, 'all'];
             MEMBERS.forEach(m => { if(m !== currentUserIdentity) sortedMembers.push(m); });
@@ -449,7 +469,7 @@
                 return (tA || 9999) - (tB || 9999);
             });
 
-            if (dailyItems.length === 0) { container.innerHTML = '<div style="text-align:center; padding: 40px; color:white; font-weight:900; opacity:0.5;">此日無行程 ❄️</div>'; initSortable(); return; }
+            if (dailyItems.length === 0) { container.innerHTML = '<div style="text-align:center; padding: 40px; color:white; font-weight:900; opacity:0.5; font-size:13px;">此日無行程 ❄️</div>'; initSortable(); return; }
 
             dailyItems.forEach(row => {
                 let themeClass = 'theme-default'; let watermark = '🎁'; let tStr = row.tag || '';
@@ -464,19 +484,28 @@
                 if(row.startTime && row.endTime) timeParts.push(`${row.startTime} - ${row.endTime}`); else if(row.startTime) timeParts.push(row.startTime);
                 let timeHtml = timeParts.length > 0 ? `<div class="time-badge">🕒 ${timeParts.join(' ')}</div>` : '';
                 
-                let noteHtml = row.notes ? `<div class="card-note">${row.notes.replace(/\n/g, '<br>')}</div>` : '';
+                // 行程內容(原本的 notes) 改放在外面顯示
+                let notesContent = row.notes ? `<div class="card-note">${row.notes.replace(/\n/g, '<br>')}</div>` : '';
                 
+                // 細項與筆記(原本的 traffic) 放裡面
                 let detailsContent = '';
-                if (row.traffic) detailsContent += `<p style="color:#FFF; margin-bottom:8px;"><strong>🛷 交通路線：</strong><br><span style="color:#94A3B8;">${row.traffic.replace(/\n/g, '<br>')}</span></p>`;
-                if (row.links) detailsContent += `<p style="color:#FFF;"><strong>🔗 相關連結：</strong><br><span style="color:#94A3B8; word-break:break-all;">${row.links.replace(/\n/g, '<br>')}</span></p>`;
+                if (row.traffic) detailsContent += `<p style="color:#FFF; margin-bottom:6px;"><strong>🛷 細項與筆記：</strong><br><span style="color:#94A3B8;">${row.traffic.replace(/\n/g, '<br>')}</span></p>`;
+                if (row.links) {
+                    let linksArr = row.links.split('\n').filter(l=>l.trim());
+                    let linksHtml = linksArr.map(l => {
+                        let url = l.trim(); if(!url.startsWith('http')) url = 'http://' + url;
+                        return `<a href="${url}" target="_blank" style="color:var(--accent-gold); word-break:break-all; text-decoration:underline;">${l}</a>`;
+                    }).join('<br>');
+                    detailsContent += `<p style="color:#FFF;"><strong>🔗 相關連結：</strong><br>${linksHtml}</p>`;
+                }
                 
                 let detailsHtml = '';
                 if (detailsContent) {
                     detailsHtml = `
-                        <button class="expand-btn" style="width:100%; background:rgba(255,255,255,0.05); color:#94A3B8; border:1px solid rgba(255,255,255,0.1); padding:10px 14px; border-radius:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; cursor:pointer;" onclick="toggleDetails(this)">
-                            <span>📋 查看詳細資訊 (交通 / 連結)</span><span style="font-size:16px;">▾</span>
+                        <button class="expand-btn" style="width:100%; background:rgba(255,255,255,0.05); color:#94A3B8; border:1px solid rgba(255,255,255,0.1); padding:8px 12px; border-radius:10px; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px; cursor:pointer;" onclick="toggleDetails(this)">
+                            <span style="font-size:12px;">📋 查看詳細資訊 (筆記 / 連結)</span><span style="font-size:14px;">▾</span>
                         </button>
-                        <div class="details-box" style="display:none; background:rgba(0,0,0,0.3); padding:12px 14px; border-radius:12px; font-size:13.5px; line-height:1.5; color:#CBD0E1; border:1px solid rgba(255,255,255,0.05); margin-bottom:12px;">
+                        <div class="details-box" style="display:none; background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:10px; font-size:12px; line-height:1.5; color:#CBD0E1; border:1px solid rgba(255,255,255,0.05); margin-bottom:10px;">
                             ${detailsContent}
                         </div>`;
                 }
@@ -488,7 +517,7 @@
                     tagsArr.forEach(tag => { tagsHtml += `<span class="tag-pill">${tag}</span>`; });
                 }
                 
-                let paxAndTagHtml = (paxHtml || tagsHtml) ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; align-items:center;">${paxHtml}${tagsHtml}</div>` : '';
+                let paxAndTagHtml = (paxHtml || tagsHtml) ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; align-items:center;">${paxHtml}${tagsHtml}</div>` : '';
                 let mapHtml = row.mapUrl ? `<a href="${row.mapUrl}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 聖誕地圖導航</a>` : '';
                 let dragHtml = currentFilter === 'all' ? `<div class="drag-handle">⋮⋮</div>` : '';
 
@@ -502,7 +531,7 @@
                         <div class="card-content">
                             ${timeHtml}
                             <div class="card-title">${row.title}</div>
-                            ${noteHtml}
+                            ${notesContent}
                             ${detailsHtml}
                             ${paxAndTagHtml}
                             ${mapHtml}
@@ -512,7 +541,7 @@
                 container.appendChild(card);
             });
 
-            // 顯示當日飯店與導航 (不論誰登入，有住宿的都要顯示)
+            // 顯示當日飯店與導航
             let hName = OVERNIGHT_SCHEDULE[currentDate];
             if (hName) {
                 let showOvernight = false;
@@ -540,14 +569,14 @@
                         hMap = FALLBACK_HOTEL_MAPS[hName] || '';
                     }
                     
-                    let mapBtn = hMap ? `<a href="${hMap}" target="_blank" class="map-btn" style="margin-top:10px;"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 飯店地圖導航</a>` : '';
+                    let mapBtn = hMap ? `<a href="${hMap}" target="_blank" class="map-btn" style="margin-top:8px;"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 飯店地圖導航</a>` : '';
                     
                     let hotelCard = document.createElement('div');
-                    hotelCard.className = 'card theme-hotel'; hotelCard.style.marginTop = '16px';
+                    hotelCard.className = 'card theme-hotel'; hotelCard.style.marginTop = '12px';
                     hotelCard.innerHTML = `
                         <div class="card-inner">
                             <div class="card-content">
-                                <div style="font-size:13px; color:#CE93D8; font-weight:900; margin-bottom:6px;">🌙 今晚入住</div>
+                                <div style="font-size:11px; color:#CE93D8; font-weight:900; margin-bottom:4px;">🌙 今晚入住</div>
                                 <div class="card-title" style="margin-bottom:0;">${hName}</div>
                                 ${mapBtn}
                             </div>
@@ -591,6 +620,7 @@
             document.getElementById('iti-notes').value = ''; document.getElementById('iti-links').value = '';
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => cb.checked = true);
+            document.querySelectorAll('.auto-resize').forEach(el => autoResize(el));
             document.getElementById('iti-modal-title').innerText = '新增行程';
             document.getElementById('itinerary-modal').style.display = 'flex';
         }
@@ -605,6 +635,7 @@
             let savedTags = (row.tag || '').split(',').map(s=>s.trim());
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => { cb.checked = savedTags.includes(cb.value); });
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => { cb.checked = row.pax && row.pax.includes(cb.value); });
+            document.querySelectorAll('.auto-resize').forEach(el => autoResize(el));
             document.getElementById('iti-modal-title').innerText = '編輯行程'; document.getElementById('itinerary-modal').style.display = 'flex';
         }
 
@@ -633,28 +664,24 @@
 
         function parseFlightsData(raw) {
             flightCombinedData = [];
-            let paxMap = {}; // paxName -> { inbound: {}, outbound: {} }
+            let paxMap = {}; 
             
             raw.forEach(row => {
                 let keys = Object.keys(row);
                 let paxRaw = String(row['朋朋'] || row['姓名'] || (keys[0] ? row[keys[0]] : '') || '').trim();
                 if (!paxRaw || paxRaw === '朋朋' || paxRaw === '姓名') return;
                 
-                let isOutbound = paxRaw.includes('回程') || String(row['起飛時間'] || '').includes('18:25') || String(row['起飛時間'] || '').includes('17:45'); // 簡單辨識回程特徵
-                
                 let date = '11/14 (六)';
                 if (String(row['起飛時間']).includes('02:30') || String(row['起飛時間']).includes('18:25') || String(row['起飛時間']).includes('17:45') || String(row['起飛時間']).includes('20:10') || String(row['起飛時間']).includes('20:25')) {
-                    date = '待填'; // 透過更精準的方式去解析
+                    date = '待填'; 
                 }
                 
-                // 這裡我們直接使用一個簡單的配對邏輯：
-                // 如果 paxRaw 是成員名字，就在 map 中記錄
                 let names = paxRaw.split(/[,、，]/).map(n=>normalizeName(n.trim())).filter(n=>n);
                 let flightNo = String(row['航班'] || (keys[1] ? row[keys[1]] : '') || '').trim();
                 let depTime = String(row['起飛時間'] || (keys[2] ? row[keys[2]] : '') || '').trim();
                 let arrTime = String(row['抵達時間'] || (keys[3] ? row[keys[3]] : '') || '').trim();
                 
-                if(!flightNo || flightNo === '') return; // 忽略空白行
+                if(!flightNo || flightNo === '') return;
 
                 let flightObj = { flightNo, depTime, arrTime };
                 let airline = '待確認';
@@ -668,7 +695,6 @@
 
                 names.forEach(n => {
                     if (!paxMap[n]) paxMap[n] = { inbound: null, outbound: null };
-                    // 根據 flightNo 和 depTime 判斷去回
                     if (['IT200','JX800','UA838','CI126','CI108','CI102','GK12'].includes(flightNo.toUpperCase())) {
                         paxMap[n].inbound = flightObj;
                         if(flightNo === 'CI102') paxMap[n].inbound.date = '11/15 (日)';
@@ -682,14 +708,12 @@
                 });
             });
 
-            // 轉換成陣列
             for (let name in paxMap) {
                 if (MEMBERS.includes(name)) {
                     flightCombinedData.push({ name: name, inbound: paxMap[name].inbound, outbound: paxMap[name].outbound });
                 }
             }
             
-            // 加入那些可能沒解析成功的成員給個預設空值
             MEMBERS.forEach(m => {
                 if(!flightCombinedData.find(f=>f.name===m)) flightCombinedData.push({ name: m, inbound: null, outbound: null });
             });
@@ -699,7 +723,6 @@
             const container = document.getElementById('flight-filter-container');
             container.innerHTML = '';
             
-            // 讓自己排第一個，然後是全員，再來是其他人
             let sortedMembers = [currentUserIdentity, 'all'];
             MEMBERS.forEach(m => { if(m !== currentUserIdentity) sortedMembers.push(m); });
             
@@ -722,7 +745,7 @@
             }
 
             if (dataToShow.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:white; opacity:0.5; font-weight:900;">沒有符合的航班資料</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:white; opacity:0.5; font-weight:900; font-size:13px;">沒有符合的航班資料</div>`;
                 return;
             }
 
@@ -731,8 +754,8 @@
                 let outB = data.outbound;
                 
                 let inHtml = inB ? `
-                    <div style="margin-bottom:16px;">
-                        <div style="font-size:12px; color:var(--accent-gold); font-weight:900; margin-bottom:8px;">🛬 去程 DEPARTURE - ${inB.date}</div>
+                    <div style="margin-bottom:14px;">
+                        <div style="font-size:11px; color:var(--accent-gold); font-weight:900; margin-bottom:6px;">🛬 去程 DEPARTURE - ${inB.date}</div>
                         <div class="flight-route">
                             <div class="flight-port"><h2>TPE</h2></div><div class="plane-icon">✈️</div><div class="flight-port"><h2>NRT</h2></div>
                         </div>
@@ -742,11 +765,11 @@
                             <div class="flight-info-col" style="text-align:right;"><label>抵達</label><span>${inB.arrTime}</span></div>
                         </div>
                     </div>
-                ` : `<div style="margin-bottom:16px; color:#94A3B8; font-size:13px; font-weight:900;">🛬 去程 DEPARTURE - 尚未填寫</div>`;
+                ` : `<div style="margin-bottom:14px; color:#94A3B8; font-size:12px; font-weight:900;">🛬 去程 DEPARTURE - 尚未填寫</div>`;
 
                 let outHtml = outB ? `
-                    <div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:16px;">
-                        <div style="font-size:12px; color:var(--accent-gold); font-weight:900; margin-bottom:8px;">🛫 回程 RETURN - ${outB.date}</div>
+                    <div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:14px;">
+                        <div style="font-size:11px; color:var(--accent-gold); font-weight:900; margin-bottom:6px;">🛫 回程 RETURN - ${outB.date}</div>
                         <div class="flight-route">
                             <div class="flight-port"><h2>NRT</h2></div><div class="plane-icon" style="transform: translateX(-50%) scaleX(-1);">✈️</div><div class="flight-port"><h2>TPE</h2></div>
                         </div>
@@ -756,12 +779,12 @@
                             <div class="flight-info-col" style="text-align:right;"><label>抵達</label><span>${outB.arrTime}</span></div>
                         </div>
                     </div>
-                ` : `<div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:16px; color:#94A3B8; font-size:13px; font-weight:900;">🛫 回程 RETURN - 尚未填寫</div>`;
+                ` : `<div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:14px; color:#94A3B8; font-size:12px; font-weight:900;">🛫 回程 RETURN - 尚未填寫</div>`;
 
                 container.innerHTML += `
                     <div class="flight-card">
                         <div class="flight-card-header">
-                            <h3 style="margin:0; font-size:20px;">🎅 ${data.name} 的機票</h3>
+                            <h3 style="margin:0; font-size:16px;">🎅 ${data.name} 的機票</h3>
                         </div>
                         <div class="flight-card-body">
                             ${inHtml}
@@ -810,8 +833,8 @@
                         updates[newId] = {
                             date: date.split(' ')[0], title: title, period: getVal(row, ['時段','Period']),
                             startTime: getVal(row, ['開始時間','Start']), endTime: getVal(row, ['結束時間','End']),
-                            tag: newTags.join(', '), notes: getVal(row, ['行程細項與筆記','筆記']),
-                            traffic: getVal(row, ['交通路線','交通']), links: getVal(row, ['相關連結','連結']),
+                            tag: newTags.join(', '), notes: getVal(row, ['行程內容','行程細項與筆記','筆記']),
+                            traffic: getVal(row, ['細項與筆記','交通路線','交通']), links: getVal(row, ['相關連結','連結']),
                             mapUrl: getVal(row, ['google map','地圖']), pax: pax, order: order++
                         };
                     });
@@ -853,9 +876,9 @@
                     let val = row[key]; if(!val || val.trim()==='') continue;
                     if (val.startsWith('http')) val = `<a href="${val}" target="_blank" style="color:var(--accent-gold); font-weight:900;">📍 地圖連結</a>`;
                     else val = val.replace(/\n/g, '<br>');
-                    html += `<div style="margin-bottom:16px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">
-                                <label style="font-size:12px; color:var(--text-light); font-weight:900; display:block; margin-bottom:4px;">${key}</label>
-                                <div style="font-size:15px; font-weight:900; color:white;">${val}</div>
+                    html += `<div style="margin-bottom:12px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px;">
+                                <label style="font-size:10px; color:var(--text-light); font-weight:900; display:block; margin-bottom:4px;">${key}</label>
+                                <div style="font-size:13px; font-weight:900; color:white;">${val}</div>
                              </div>`;
                 }
                 html += `</div></div>`; container.innerHTML += html;
@@ -877,7 +900,8 @@
         }
         function openItemModal(type, catId) {
             document.getElementById('targetListType').value = type; document.getElementById('targetCategoryId').value = catId;
-            document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = ''; document.getElementById('itemModal').style.display = 'flex';
+            document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = '';
+            document.getElementById('itemModal').style.display = 'flex';
         }
         function saveListItem() {
             const type = document.getElementById('targetListType').value; const catId = document.getElementById('targetCategoryId').value;
@@ -899,10 +923,10 @@
             if (data.length === 0) return;
             data.forEach(cat => {
                 let itemsHtml = cat.items.map(i => {
-                    let note = i.note ? `<div style="font-size:12px; color:#94A3B8; margin-top:4px;">${i.note}</div>` : '';
+                    let note = i.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${i.note}</div>` : '';
                     return `<div class="item-card"><input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')"><div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div><button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
                 }).join('');
-                container.innerHTML += `<div style="margin-bottom:24px;"><div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:10px;"><h3>${cat.name}</h3><div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px;">+ 新增</button><button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div></div><div>${itemsHtml}</div></div>`;
+                container.innerHTML += `<div style="margin-bottom:20px;"><div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:8px;"><h3>${cat.name}</h3><div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px; font-size:11px;">+ 新增</button><button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div></div><div>${itemsHtml}</div></div>`;
             });
         }
         function renderShoppingList() { renderGenericList(shoppingData, 'shopping-list-container', 'shop'); }
@@ -919,8 +943,8 @@
             const container = document.getElementById('todo-container'); container.innerHTML = '';
             if(todoData.length===0) return;
             todoData.forEach(t => {
-                let d = t.date ? `<span style="font-size:11px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">⏳ ${t.date}</span>` : '';
-                let n = t.note ? `<div style="font-size:12px; color:#94A3B8; margin-top:4px;">${t.note}</div>` : '';
+                let d = t.date ? `<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">⏳ ${t.date}</span>` : '';
+                let n = t.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${t.note}</div>` : '';
                 container.innerHTML += `<div class="item-card"><input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')"><div style="flex:1"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div><button onclick="delTodo('${t.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
             });
         }
