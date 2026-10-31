@@ -334,7 +334,7 @@
             <input type="hidden" id="targetCategoryId">
             <input type="hidden" id="targetItemId">
             <div class="input-group"><label>物品名稱 (必填)</label><input type="text" id="itemName"></div>
-            <div class="input-group"><label>備註 (選填)</label><input type="text" id="itemNote"></div>
+            <div class="input-group"><label>備註 (選填)</label><textarea class="auto-resize" id="itemNote" oninput="autoResize(this)"></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itemModal')">取消</button><button class="btn-save" onclick="saveListItem()">儲存</button></div>
         </div>
     </div>
@@ -439,7 +439,41 @@
             renderFlightFilters();
             renderFlightsTab();
 
-            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || []; luggageData = JSON.parse(localStorage.getItem(`lug_${currentUserIdentity}`)) || [];
+            
+            const DEFAULT_LUGGAGE = [
+                { id: 'cat_docs', name: '🛂 重要文件與財物', items: [
+                    { id: 'i_doc1', name: '護照', note: '確認效期大於6個月', checked: false, tags: [] },
+                    { id: 'i_doc2', name: '日幣現金', note: '依個人需求準備', checked: false, tags: [] },
+                    { id: 'i_doc3', name: '信用卡 (海外高回饋)', note: '推薦準備JCB或雙幣卡', checked: false, tags: [] },
+                    { id: 'i_doc4', name: '實體交通卡', note: '西瓜卡或綁定Apple Pay', checked: false, tags: [] },
+                    { id: 'i_doc5', name: '網卡 / eSIM', note: '確認開通設定', checked: false, tags: [] }
+                ]},
+                { id: 'cat_clothes', name: '🧥 換洗衣物 (秋季)', items: [
+                    { id: 'i_clo1', name: '保暖防風外套', note: '11月東京早晚溫差大', checked: false, tags: [] },
+                    { id: 'i_clo2', name: '發熱衣 / 內搭', note: '依怕冷程度準備', checked: false, tags: [] },
+                    { id: 'i_clo3', name: '好走耐走的球鞋', note: '每天絕對破萬步', checked: false, tags: [] },
+                    { id: 'i_clo4', name: '內衣褲與襪子', note: '天數份+1', checked: false, tags: [] }
+                ]},
+                { id: 'cat_elec', name: '🔋 3C與生活用品', items: [
+                    { id: 'i_elec1', name: '行動電源', note: '找路拍照很耗電', checked: false, tags: [] },
+                    { id: 'i_elec2', name: '充電頭與傳輸線', note: '日本插頭與台灣通用', checked: false, tags: [] },
+                    { id: 'i_elec3', name: '個人常備藥品', note: '感冒藥、止痛藥、胃藥等', checked: false, tags: [] },
+                    { id: 'i_elec4', name: '保濕保養 / 護唇膏', note: '日本氣候偏乾', checked: false, tags: [] },
+                    { id: 'i_elec5', name: '折疊晴雨傘', note: '擋雨或擋陽光', checked: false, tags: [] }
+                ]}
+            ];
+
+            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || [];
+            
+            let savedLug = localStorage.getItem(`lug_${currentUserIdentity}`);
+            if (savedLug) {
+                luggageData = JSON.parse(savedLug);
+            } else {
+                // 如果是第一次載入，給予預設東京行李範本
+                luggageData = JSON.parse(JSON.stringify(DEFAULT_LUGGAGE));
+                localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData));
+            }
+
             db.ref(`users/${currentUserIdentity}/todo`).on('value', snap => {
                 todoData = []; if (snap.exists()) { let td = snap.val(); for(let key in td) { td[key].id = key; todoData.push(td[key]); } }
                 renderTodoList();
@@ -997,6 +1031,7 @@
                 document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = '';
             }
             document.getElementById('itemModal').style.display = 'flex';
+            triggerAllAutoResize();
         }
         function saveListItem() {
             const type = document.getElementById('targetListType').value; const catId = document.getElementById('targetCategoryId').value;
@@ -1027,7 +1062,7 @@
             if (data.length === 0) return;
             data.forEach(cat => {
                 let itemsHtml = cat.items.map(i => {
-                    let note = i.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${i.note}</div>` : '';
+                    let note = i.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${i.note.replace(/\n/g, '<br>')}</div>` : '';
                     return `<div class="item-card"><input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')"><div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div><div style="display:flex; gap:8px;"><button onclick="openItemModal('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:var(--accent-gold); cursor:pointer;">✏️</button><button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div></div>`;
                 }).join('');
                 container.innerHTML += `<div style="margin-bottom:20px;"><div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:8px;"><h3>${cat.name}</h3><div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px; font-size:11px;">+ 新增</button><button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div></div><div>${itemsHtml}</div></div>`;
