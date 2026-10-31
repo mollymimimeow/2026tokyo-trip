@@ -101,7 +101,17 @@
         .input-group label { display: block; font-size: 12px; font-weight: 900; color: #94A3B8; margin-bottom: 4px; }
         
         /* Auto-resizing textarea class */
-        .auto-resize { overflow: hidden; resize: none; min-height: 40px; }
+        .auto-resize {
+            field-sizing: content;
+            min-height: 48px;
+            max-height: 260px;
+            overflow-y: auto;
+            resize: none;
+            box-sizing: border-box;
+            line-height: 1.5;
+            display: block;
+            width: 100%;
+        }
         
         .input-group input, .input-group textarea, .input-group select { 
             width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; 
@@ -313,14 +323,12 @@
         function autoResize(el) {
             if (!el) return;
             el.style.height = 'auto';
-            let newH = el.scrollHeight;
-            if (newH < 44) newH = 44;
-            el.style.height = (newH + 4) + 'px';
+            el.style.height = Math.max(el.scrollHeight, 48) + 'px';
         }
         function triggerAllAutoResize() {
             setTimeout(() => {
-                triggerAllAutoResize();
-            }, 50);
+                document.querySelectorAll('.auto-resize').forEach(el => autoResize(el));
+            }, 100);
         }
 
         const snowContainer = document.getElementById('snow-container');
