@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>2026 東京之旅</title>
+    <title>2026 東京秋日之旅 (雲端版)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- 引入必要的套件 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <style>
         :root {
             --bg-color: #FCF9F6;
@@ -28,7 +34,7 @@
 
         body {
             background-color: var(--bg-color); color: var(--text-main);
-            padding-bottom: calc(80px + var(--safe-bottom)); 
+            padding-bottom: calc(90px + var(--safe-bottom)); 
         }
 
         .app-container {
@@ -66,18 +72,18 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .header p { font-size: 13px; opacity: 0.9; position: relative; z-index: 2; }
-        .header-leaf {
-            position: absolute; fill: rgba(255,255,255,0.25);
-            animation: sway 4s ease-in-out infinite alternate;
+        
+        .user-badge {
+            position: absolute; top: 16px; right: 20px; z-index: 10;
+            background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px;
+            font-size: 12px; font-weight: 900; cursor: pointer; backdrop-filter: blur(4px);
         }
-        @keyframes sway { 0% { transform: rotate(-10deg); } 100% { transform: rotate(10deg); } }
 
-        /* 頁籤切換 */
         .view-section { display: none; animation: fadeIn 0.3s ease; position: relative; z-index: 1; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ================= 過濾器 (行程 & 航班共用) ================= */
+        /* 過濾器 & 頁籤 */
         .filter-container { display: flex; overflow-x: auto; gap: 10px; padding: 16px 20px 8px; scrollbar-width: none; }
         .filter-container::-webkit-scrollbar { display: none; }
         .filter-btn {
@@ -106,179 +112,104 @@
         
         /* 卡片共用結構 */
         .card {
-            border-radius: 20px; padding: 18px;
+            border-radius: 20px; padding: 18px 18px 18px 36px;
             box-shadow: 0 4px 16px rgba(0,0,0,0.05); position: relative; 
             overflow: hidden; margin-bottom: 4px;
-            border-top: 1px solid rgba(0,0,0,0.03);
-            border-right: 1px solid rgba(0,0,0,0.03);
-            border-bottom: 1px solid rgba(0,0,0,0.03);
-            transition: transform 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.03);
+            background: white;
         }
-        .card:active { transform: scale(0.98); }
         .card-content { position: relative; z-index: 2; }
         .card-watermark {
             position: absolute; right: -5px; bottom: -15px; font-size: 100px; 
             opacity: 0.08; z-index: 1; pointer-events: none; transform: rotate(-15deg);
         }
 
-        /* 依照行程類型的漸層與色彩 */
-        .theme-food { border-left: 6px solid #F4A261; background: linear-gradient(120deg, #FFFFFF 60%, #FFF8F3 100%); }
+        /* 拖曳與編輯按鈕 */
+        .drag-handle {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
+            background: rgba(0,0,0,0.03); display: flex; align-items: center; justify-content: center;
+            cursor: grab; color: #CBD0E1; font-size: 18px; border-top-left-radius: 20px; border-bottom-left-radius: 20px;
+        }
+        .drag-handle:active { cursor: grabbing; background: rgba(0,0,0,0.08); }
+        .card-actions {
+            position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10;
+        }
+        .icon-btn {
+            background: rgba(255,255,255,0.9); border: 1px solid #EEE; width: 30px; height: 30px;
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); color: var(--text-light);
+        }
+
+        /* 主題色彩 */
+        .theme-food { border-left: 6px solid #F4A261 !important; background: linear-gradient(120deg, #FFFFFF 60%, #FFF8F3 100%); }
         .theme-food .time-badge { background: #FFF4EB; color: #E76F51; }
-        
-        .theme-attraction { border-left: 6px solid #8AB17D; background: linear-gradient(120deg, #FFFFFF 60%, #F4F9F4 100%); }
+        .theme-attraction { border-left: 6px solid #8AB17D !important; background: linear-gradient(120deg, #FFFFFF 60%, #F4F9F4 100%); }
         .theme-attraction .time-badge { background: #EEF5ED; color: #52796F; }
-        
-        .theme-transport { border-left: 6px solid #70A0AF; background: linear-gradient(120deg, #FFFFFF 60%, #F2F7FA 100%); }
+        .theme-transport { border-left: 6px solid #70A0AF !important; background: linear-gradient(120deg, #FFFFFF 60%, #F2F7FA 100%); }
         .theme-transport .time-badge { background: #E9F1F5; color: #2A6F97; }
-        
-        .theme-hotel { border-left: 6px solid #B5838D; background: linear-gradient(120deg, #FFFFFF 60%, #FAF5F6 100%); }
+        .theme-hotel { border-left: 6px solid #B5838D !important; background: linear-gradient(120deg, #FFFFFF 60%, #FAF5F6 100%); }
         .theme-hotel .time-badge { background: #F5EAEB; color: #6D6875; }
-        
-        .theme-shop { border-left: 6px solid #E5989B; background: linear-gradient(120deg, #FFFFFF 60%, #FDF4F5 100%); }
+        .theme-shop { border-left: 6px solid #E5989B !important; background: linear-gradient(120deg, #FFFFFF 60%, #FDF4F5 100%); }
         .theme-shop .time-badge { background: #FDE8E9; color: #B56576; }
-        
-        .theme-default { border-left: 6px solid #E07A5F; background: linear-gradient(120deg, #FFFFFF 60%, #FFF9F8 100%); }
+        .theme-default { border-left: 6px solid #E07A5F !important; background: linear-gradient(120deg, #FFFFFF 60%, #FFF9F8 100%); }
         .theme-default .time-badge { background: #FFF4F0; color: #E07A5F; }
 
-        .time-badge {
-            font-size: 13px; padding: 5px 12px; border-radius: 12px; 
-            display: inline-block; font-weight: 900; margin-bottom: 10px;
-        }
-        .card-title { font-size: 19px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: #2C3040; }
+        .time-badge { font-size: 13px; padding: 5px 12px; border-radius: 12px; display: inline-block; font-weight: 900; margin-bottom: 10px; }
+        .card-title { font-size: 19px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: #2C3040; padding-right: 60px; }
+        .card-note { background: rgba(255,255,255,0.6); border-left: 3px solid rgba(0,0,0,0.1); padding: 10px 14px; border-radius: 6px 12px 12px 6px; font-size: 13.5px; color: #6B6256; line-height: 1.5; margin-bottom: 12px; }
+        .tag-pill { font-size: 12px; color: var(--text-light); background: rgba(255,255,255,0.7); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px; margin-right: 4px; font-weight: 700; }
         
-        .card-note {
-            background-color: rgba(255,255,255,0.6); backdrop-filter: blur(4px);
-            border-left: 3px solid rgba(0,0,0,0.1);
-            padding: 10px 14px; border-radius: 6px 12px 12px 6px; font-size: 13.5px;
-            color: #6B6256; line-height: 1.5; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 8px;
-        }
-        .card-note::before { content: '📝'; font-size: 14px; margin-top: 1px; }
-
-        .tag-pill {
-            font-size: 12px; color: var(--text-light); background-color: rgba(255,255,255,0.7);
-            padding: 5px 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px; margin-right: 4px; font-weight: 700;
-        }
-        .map-btn {
-            display: flex; align-items: center; justify-content: center; background-color: rgba(255,255,255,0.9);
-            color: var(--text-main); text-decoration: none; padding: 12px; border-radius: 12px;
-            font-size: 14px; font-weight: 900; margin-top: 8px; border: 1px solid rgba(0,0,0,0.05); transition: background-color 0.2s;
-        }
+        .map-btn { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.9); color: var(--text-main); text-decoration: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 900; margin-top: 8px; border: 1px solid rgba(0,0,0,0.05); }
         .map-btn svg { width: 18px; height: 18px; margin-right: 8px; fill: var(--primary-color); }
 
-        .details-box {
-            margin-top: 12px; padding: 14px; background-color: rgba(255,255,255,0.7); border-radius: 12px;
-            font-size: 13px; color: var(--text-light); line-height: 1.6; border: 1px dashed rgba(0,0,0,0.1);
+        /* FAB 新增按鈕 */
+        .fab {
+            position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px;
+            background: var(--primary-color); color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 400;
+            box-shadow: 0 4px 15px rgba(224, 122, 95, 0.4); cursor: pointer; z-index: 90; transition: transform 0.2s;
         }
-        .details-box p { margin-bottom: 10px; }
-        .details-box p:last-child { margin-bottom: 0; }
-        .details-box strong { color: var(--text-main); display: inline-block; margin-bottom: 4px; font-weight: 900; }
-        
-        .expand-btn {
-            color: var(--text-main); font-size: 13px; font-weight: 900; background: rgba(255,255,255,0.8);
-            border: none; padding: 8px 14px; border-radius: 20px; margin-top: 4px; cursor: pointer; display: inline-block;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
+        .fab:active { transform: scale(0.9); }
 
-        #loading { text-align: center; padding: 40px; color: var(--primary-color); font-weight: 700; }
-
-        /* ================= 共用 Tabs 樣式 ================= */
-        .list-tabs { display: flex; padding: 20px 20px 0; gap: 10px; }
-        .list-tab-btn {
-            flex: 1; padding: 12px; border: none; background: white; border-radius: 12px;
-            font-size: 15px; font-weight: 900; color: var(--text-light); cursor: pointer; transition: 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        }
-        .list-tab-btn.active { background: var(--text-main); color: white; }
-
-        .sub-view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
-        .sub-view.active { display: block; }
-
-        /* ================= 航班/飯店頁面 (機票設計) ================= */
-        .flights-container { padding: 0 0 24px; display: flex; flex-direction: column; gap: 24px; }
-        .flight-date-title { font-size: 15px; font-weight: 900; color: var(--text-main); margin: 10px 0 -10px; border-left: 4px solid var(--secondary-color); padding-left: 10px; }
-        .ticket {
-            background: #fff; border-radius: 16px; position: relative;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.06); overflow: hidden;
-            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.05));
-        }
-        .ticket-header {
-            background: var(--text-main); color: white; padding: 16px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .ticket-header h3 { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
-        .ticket-header .airline { font-size: 13px; font-weight: 700; opacity: 0.95; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 12px;}
-        
-        .ticket-body { padding: 20px; position: relative; }
-        .ticket-route { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;}
-        .ticket-route::after {
-            content: ''; position: absolute; left: 60px; right: 60px; top: 22px;
-            border-top: 2px dashed #DDD; z-index: 0;
-        }
-        .plane-icon { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); background: #fff; padding: 0 10px; z-index: 1; font-size: 18px;}
-        .port { text-align: center; z-index: 1; background: #fff; padding: 0 5px;}
-        .port h2 { font-size: 32px; font-weight: 900; color: #E07A5F; margin-bottom: 2px; line-height: 1;}
-        .port p { font-size: 12px; color: var(--text-light); font-weight: 900;}
-        
-        .ticket-info { display: flex; justify-content: space-between; background: #F8F9FA; padding: 12px 16px; border-radius: 12px;}
-        .info-col { display: flex; flex-direction: column; flex: 1;}
-        .info-col:nth-child(2) { text-align: center; }
-        .info-col:nth-child(3) { text-align: right; }
-        .info-col label { font-size: 11px; color: var(--text-light); margin-bottom: 2px; font-weight: 700;}
-        .info-col span { font-size: 15px; font-weight: 900; color: var(--text-main); }
-        
-        .ticket-divider { border-top: 2px dashed #EAEAEA; margin: 0; position: relative; }
-        .ticket-divider::before, .ticket-divider::after {
-            content: ''; position: absolute; top: -10px; width: 20px; height: 20px;
-            background-color: var(--bg-color); border-radius: 50%;
-        }
-        .ticket-divider::before { left: -30px; box-shadow: inset -3px 0 5px rgba(0,0,0,0.02);}
-        .ticket-divider::after { right: -30px; box-shadow: inset 3px 0 5px rgba(0,0,0,0.02);}
-        
-        .ticket-footer { padding: 16px 20px 24px; background: #fff; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; display: flex; justify-content: center;}
-        .barcode { height: 30px; width: 80%; background: repeating-linear-gradient(to right, #333 0, #333 2px, transparent 2px, transparent 4px, #333 4px, #333 5px, transparent 5px, transparent 8px, #333 8px, #333 11px, transparent 11px, transparent 13px); opacity: 0.25;}
-
-        /* ================= 待辦/行李/購物 樣式 ================= */
-        .add-btn-large {
-            width: 100%; padding: 14px; background-color: var(--primary-color); color: white;
-            border: none; border-radius: 14px; font-size: 15px; font-weight: 900; margin-bottom: 20px;
-            cursor: pointer; box-shadow: 0 4px 12px rgba(224, 122, 95, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-        .item-card {
-            background: white; border-radius: 14px; padding: 16px; margin-bottom: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 12px;
-        }
-        .item-checkbox { margin-top: 4px; width: 22px; height: 22px; accent-color: var(--primary-color); flex-shrink: 0; }
-        .item-content { flex-grow: 1; }
-        .item-title { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
-        .item-title.done { text-decoration: line-through; color: #B0B5C9; }
-        .item-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-        .badge-user { background: #E8F0FE; color: #1967D2; font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 900; }
-        .badge-date { background: #FFF0EB; color: var(--primary-color); font-size: 11px; padding: 3px 8px; border-radius: 6px; font-weight: 900; }
-        .item-tag { background: #FFF0EB; color: var(--primary-color); font-size: 11px; padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(224, 122, 95, 0.2); font-weight: 900;}
-        .item-note-text { font-size: 13px; color: var(--text-light); line-height: 1.4; background: var(--bg-color); padding: 8px; border-radius: 8px; font-weight: 500;}
-        .del-btn { color: #CBD0E1; border: none; background: none; font-size: 16px; padding: 4px; cursor: pointer; }
-        
-        .category-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 2px dashed #eee; padding-bottom: 8px; }
-        .category-header h3 { font-size: 17px; font-weight: 900; color: var(--text-main); }
-        .add-small-btn { font-size: 12px; background: var(--bg-color); color: var(--primary-color); border: 1px dashed var(--primary-color); padding: 4px 10px; border-radius: 6px; font-weight: 900;}
-
-        /* ================= 模態框 (共用) ================= */
+        /* 模態框 (共用) */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(30,33,43,0.6); display: none; justify-content: center; align-items: center;
-            z-index: 100; padding: 20px; backdrop-filter: blur(4px);
+            background: rgba(30,33,43,0.7); display: none; justify-content: center; align-items: flex-end;
+            z-index: 100; backdrop-filter: blur(4px); padding-top: 50px;
         }
-        .modal-box { background: white; padding: 24px; border-radius: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-        .modal-box h3 { margin-bottom: 18px; font-weight: 900; color: var(--text-main); font-size: 20px; }
+        .modal-box { 
+            background: white; padding: 24px; border-top-left-radius: 24px; border-top-right-radius: 24px; 
+            width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .modal-box h3 { margin-bottom: 18px; font-weight: 900; color: var(--text-main); font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px;}
         .input-group { margin-bottom: 14px; }
         .input-group label { display: block; font-size: 13px; font-weight: 900; color: var(--text-main); margin-bottom: 6px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #EAEAEA; border-radius: 10px; font-size: 14px; background: #FAFAFA; }
-        .input-group input:focus { outline: 2px solid var(--secondary-color); background: white; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
-        .btn-cancel { padding: 10px 18px; border: none; background: #F1F3F5; border-radius: 10px; color: var(--text-light); font-weight: 900; cursor: pointer;}
-        .btn-save { padding: 10px 20px; border: none; background: var(--primary-color); border-radius: 10px; color: white; font-weight: 900; cursor: pointer;}
+        .input-group input, .input-group textarea, .input-group select { 
+            width: 100%; padding: 12px; border: 1px solid #EAEAEA; border-radius: 10px; font-size: 14px; background: #FAFAFA; font-family: inherit;
+        }
+        .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: 2px solid var(--secondary-color); background: white; }
+        
+        /* Checkbox 群組 */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: var(--text-main); background: #F8F9FA; padding: 8px; border-radius: 8px;}
+        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary-color); }
 
-        /* ================= 底部導覽列 ================= */
+        .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; position: sticky; bottom: 0; background: white; padding-top: 10px; border-top: 1px solid #eee;}
+        .btn-cancel { padding: 12px 20px; border: none; background: #F1F3F5; border-radius: 10px; color: var(--text-light); font-weight: 900; cursor: pointer; flex: 1;}
+        .btn-save { padding: 12px 20px; border: none; background: var(--primary-color); border-radius: 10px; color: white; font-weight: 900; cursor: pointer; flex: 2;}
+
+        /* 身分選擇大網格 */
+        .identity-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px;}
+        .identity-btn { background: #F8F9FA; border: 2px solid #EAEAEA; padding: 16px; border-radius: 16px; font-size: 18px; font-weight: 900; color: var(--text-main); cursor: pointer; transition: 0.2s;}
+        .identity-btn:active { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: scale(0.95);}
+
+        /* 隱藏 Netlify 徽章 */
+        [data-netlify-deploy-id], #netlify-drawer, .netlify-badge { display: none !important; }
+
+        /* 底部導覽列 */
         .bottom-nav {
             position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px;
             background-color: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
@@ -293,40 +224,29 @@
         .nav-item.active { color: var(--primary-color); }
         .nav-icon { font-size: 22px; transition: transform 0.2s; }
         .nav-item.active .nav-icon { transform: translateY(-3px) scale(1.1); }
-    
-        /* 隱藏 Netlify 浮動徽章 (避免遮擋底部按鈕) */
-        [data-netlify-deploy-id], 
-        #netlify-drawer, 
-        .netlify-badge, 
-        iframe[src*="netlify"], 
-        div[class*="netlify"],
-        div[id*="netlify"],
-        [aria-label*="Netlify"] {
-            display: none !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-            visibility: hidden !important;
-            z-index: -9999 !important;
-        }
-
+        
+        .list-tabs { display: flex; padding: 20px 20px 0; gap: 10px; }
+        .list-tab-btn { flex: 1; padding: 12px; border: none; background: white; border-radius: 12px; font-size: 15px; font-weight: 900; color: var(--text-light); cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.03);}
+        .list-tab-btn.active { background: var(--text-main); color: white; }
+        .sub-view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .sub-view.active { display: block; }
+        
+        /* 系統提示 */
+        #loading { text-align: center; padding: 40px; color: var(--primary-color); font-weight: 700; line-height: 1.6;}
     </style>
 </head>
 <body>
 
-    <!-- 背景楓葉動畫 -->
     <div class="falling-leaves-container">
         <svg class="bg-leaf" style="left: 10%; animation-duration: 12s; animation-delay: 0s;" width="30" viewBox="0 0 24 24" fill="#F4A261"><path d="M12 2L15 8L21 9L17 14L18 20L12 17L6 20L7 14L3 9L9 8L12 2Z"/></svg>
         <svg class="bg-leaf" style="left: 40%; animation-duration: 15s; animation-delay: 4s; width:20px;" viewBox="0 0 24 24" fill="#E07A5F"><path d="M12 2C12 2 15 6 15 9C15 12 12 15 12 15C12 15 9 12 9 9C9 6 12 2 12 2Z"/></svg>
-        <svg class="bg-leaf" style="left: 70%; animation-duration: 10s; animation-delay: 2s;" width="25" viewBox="0 0 24 24" fill="#E76F51"><path d="M12 2L15 8L21 9L17 14L18 20L12 17L6 20L7 14L3 9L9 8L12 2Z"/></svg>
         <svg class="bg-leaf" style="left: 85%; animation-duration: 18s; animation-delay: 7s; width:35px;" viewBox="0 0 24 24" fill="#F4A261"><path d="M12 2C12 2 15 6 15 9C15 12 12 15 12 15C12 15 9 12 9 9C9 6 12 2 12 2Z"/></svg>
     </div>
 
     <div class="app-container">
-        <!-- 頂部 Header -->
         <div class="header">
-            <svg class="header-leaf leaf-1" viewBox="0 0 24 24"><path d="M12 2L15 8L21 9L17 14L18 20L12 17L6 20L7 14L3 9L9 8L12 2Z"/></svg>
-            <svg class="header-leaf leaf-2" viewBox="0 0 24 24"><path d="M12 2C12 2 15 6 15 9C15 12 12 15 12 15C12 15 9 12 9 9C9 6 12 2 12 2Z"/></svg>
-            <h1>2026 東京秋日之旅 <span style='font-size:10px; color:#fff;'>v1.6</span></h1>
+            <div id="user-badge" class="user-badge" onclick="showIdentityModal()">切換使用者</div>
+            <h1>2026 東京秋日之旅 <span style='font-size:10px; color:#fff;'>雲端版</span></h1>
             <p>Tokyo Autumn Trip 🍁</p>
         </div>
 
@@ -334,11 +254,13 @@
         <div id="view-itinerary" class="view-section active">
             <div class="filter-container" id="filter-container"></div>
             <div class="date-tabs" id="date-tabs"></div>
-            <div id="loading">讀取 Google Sheet 資料中...</div>
+            <div id="loading">系統連線中...</div>
             <div class="itinerary-container" id="itinerary-container"></div>
+            
+            <div id="fab-add" class="fab" onclick="openItineraryModal()">＋</div>
         </div>
 
-        <!-- ================= 航班/飯店頁面 ================= -->
+        <!-- ================= 航班/飯店區塊 ================= -->
         <div id="view-flights" class="view-section">
             <div class="list-tabs">
                 <button class="list-tab-btn active" onclick="switchSubView('view-flights', 'flights-list', this)">✈️ 航班資訊</button>
@@ -347,22 +269,23 @@
             
             <div id="sub-flights-list" class="sub-view active" style="padding-top:0;">
                 <div class="filter-container" id="flight-filter-container" style="padding: 16px 20px 8px;"></div>
-                <div class="flights-container" id="flights-ticket-container" style="padding-top: 10px;">
-                    <!-- JS 動態渲染航班票根 -->
-                </div>
+                <div class="flights-container" id="flights-ticket-container" style="padding-top: 10px;"></div>
+                <button style="width:100%; padding:14px; background:var(--text-main); color:white; border-radius:12px; font-weight:900; border:none; margin-top:10px;" onclick="openFlightModal()">＋ 新增航班</button>
             </div>
             
             <div id="sub-hotels-list" class="sub-view">
-                <div class="flights-container" id="hotel-info-container">
-                    <!-- JS 動態渲染飯店 -->
-                </div>
+                <div class="flights-container" id="hotel-info-container"></div>
+                <button style="width:100%; padding:14px; background:var(--text-main); color:white; border-radius:12px; font-weight:900; border:none; margin-top:10px;" onclick="openHotelModal()">＋ 新增住宿</button>
             </div>
         </div>
 
         <!-- ================= 購買清單 ================= -->
         <div id="view-shopping" class="view-section">
             <div style="padding:20px;">
-                <button class="add-btn-large" onclick="shoppingAddCategory()">➕ 新增購物分類 (如藥妝、伴手禮)</button>
+                <div style="background:#FFF0EB; color:#E07A5F; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px;">
+                    🛒 這是你的私人購物清單（不會與其他人共用）
+                </div>
+                <button style="width:100%; padding:14px; background:var(--primary-color); color:white; border-radius:12px; font-weight:900; border:none; margin-bottom:16px;" onclick="addCategory('shop', '輸入分類名稱')">➕ 新增購物分類</button>
                 <div id="shopping-list-container"></div>
             </div>
         </div>
@@ -373,14 +296,18 @@
                 <button class="list-tab-btn active" onclick="switchSubView('view-todo', 'todo', this)">📝 待辦事項</button>
                 <button class="list-tab-btn" onclick="switchSubView('view-todo', 'luggage', this)">🧳 行李清單</button>
             </div>
-            
             <div id="sub-todo" class="sub-view active">
-                <button class="add-btn-large" onclick="openTodoModal()">➕ 新增待辦事項</button>
+                <div style="background:#E8F0FE; color:#1967D2; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px;">
+                    📝 這是你的私人待辦事項（儲存於雲端）
+                </div>
+                <button style="width:100%; padding:14px; background:var(--primary-color); color:white; border-radius:12px; font-weight:900; border:none; margin-bottom:16px;" onclick="openTodoModal()">➕ 新增待辦事項</button>
                 <div id="todo-container"></div>
             </div>
-            
             <div id="sub-luggage" class="sub-view">
-                <button class="add-btn-large" onclick="luggageAddCategory()">➕ 新增行李分類 (如衣物、文件)</button>
+                <div style="background:#FFF0EB; color:#E07A5F; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px;">
+                    🧳 這是你的私人行李清單（不會與其他人共用）
+                </div>
+                <button style="width:100%; padding:14px; background:var(--primary-color); color:white; border-radius:12px; font-weight:900; border:none; margin-bottom:16px;" onclick="addCategory('lug', '輸入行李分類')">➕ 新增行李分類</button>
                 <div id="luggage-container"></div>
             </div>
         </div>
@@ -400,11 +327,126 @@
                 <span class="nav-icon">🛍️</span><span>購買</span>
             </div>
         </div>
-
-    </div> <!-- app-container end -->
+    </div>
 
     <!-- ================= 模態框區塊 ================= -->
-    <!-- 通用 Item Modal (購物/行李) -->
+    
+    <!-- 選擇身分 Modal -->
+    <div class="modal-overlay" id="identity-modal">
+        <div class="modal-box">
+            <h3>哈囉！請問你是哪位旅伴？</h3>
+            <p style="font-size:13px; color:var(--text-light); margin-bottom:10px;">系統將為你載入專屬的行程與私人清單。</p>
+            <div class="identity-grid" id="identity-grid">
+                <!-- JS 動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯/新增行程 Modal -->
+    <div class="modal-overlay" id="itinerary-modal">
+        <div class="modal-box">
+            <h3 id="iti-modal-title">新增行程</h3>
+            <input type="hidden" id="iti-id">
+            
+            <div class="input-group">
+                <label>行程名稱 (必填)</label>
+                <input type="text" id="iti-title" placeholder="例如：去淺草寺穿和服">
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>日期</label>
+                    <select id="iti-date">
+                        <option value="11/14">11/14 (六)</option>
+                        <option value="11/15">11/15 (日)</option>
+                        <option value="11/16">11/16 (一)</option>
+                        <option value="11/17">11/17 (二)</option>
+                        <option value="11/18">11/18 (三)</option>
+                        <option value="11/19">11/19 (四)</option>
+                        <option value="11/20">11/20 (五)</option>
+                        <option value="11/21">11/21 (六)</option>
+                        <option value="11/22">11/22 (日)</option>
+                    </select>
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>時段分類</label>
+                    <select id="iti-period">
+                        <option value="早餐">早餐</option>
+                        <option value="上午">上午</option>
+                        <option value="午餐">午餐</option>
+                        <option value="下午">下午</option>
+                        <option value="晚餐">晚餐</option>
+                        <option value="晚上">晚上</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="input-group" style="flex:1;">
+                    <label>開始時間</label>
+                    <input type="time" id="iti-start">
+                </div>
+                <div class="input-group" style="flex:1;">
+                    <label>結束時間</label>
+                    <input type="time" id="iti-end">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>主題標籤 (例如：吃、景點、購物、交通)</label>
+                <input type="text" id="iti-tag" placeholder="影響卡片顏色設計">
+            </div>
+            <div class="input-group">
+                <label>參與成員 (可複選)</label>
+                <div class="checkbox-grid" id="iti-pax-grid">
+                    <!-- JS 生成 -->
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Google Map 連結</label>
+                <input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/...">
+            </div>
+            <div class="input-group">
+                <label>交通路線</label>
+                <textarea id="iti-traffic" rows="2" placeholder="搭乘地鐵..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>行程筆記與細項</label>
+                <textarea id="iti-notes" rows="2" placeholder="記得帶..."></textarea>
+            </div>
+            <div class="input-group">
+                <label>相關連結</label>
+                <textarea id="iti-links" rows="2" placeholder="餐廳官網網址..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button>
+                <button class="btn-save" onclick="saveItinerary()">儲存上傳</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 待辦事項 Modal -->
+    <div class="modal-overlay" id="todoModal">
+        <div class="modal-box">
+            <h3>新增待辦事項</h3>
+            <div class="input-group">
+                <label>待辦事項 (必填)</label>
+                <input type="text" id="todoTask" placeholder="例如：預定 Skyliner 車票">
+            </div>
+            <div class="input-group">
+                <label>截止日期 (選填)</label>
+                <input type="date" id="todoDate">
+            </div>
+            <div class="input-group">
+                <label>備註 (選填)</label>
+                <textarea id="todoNote" rows="2" placeholder="詳細說明..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('todoModal')">取消</button>
+                <button class="btn-save" onclick="saveTodo()">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 個人清單共用 Modal -->
     <div class="modal-overlay" id="itemModal">
         <div class="modal-box">
             <h3 id="itemModalTitle">新增物品</h3>
@@ -424,594 +466,264 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeModal('itemModal')">取消</button>
-                <button class="btn-save" onclick="saveItem()">儲存</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Todo Modal -->
-    <div class="modal-overlay" id="todoModal">
-        <div class="modal-box">
-            <h3>新增待辦事項</h3>
-            <div class="input-group">
-                <label>待辦事項 (必填)</label>
-                <input type="text" id="todoTask" placeholder="例如：預定 Skyliner 車票">
-            </div>
-            <div class="input-group">
-                <label>負責人 (必填)</label>
-                <input type="text" id="todoAssignee" placeholder="例如：雅">
-            </div>
-            <div class="input-group">
-                <label>截止日期 (選填)</label>
-                <input type="date" id="todoDate">
-            </div>
-            <div class="input-group">
-                <label>備註 (選填)</label>
-                <textarea id="todoNote" rows="2" placeholder="詳細說明..."></textarea>
-            </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('todoModal')">取消</button>
-                <button class="btn-save" onclick="saveTodo()">儲存</button>
+                <button class="btn-save" onclick="saveListItem()">儲存</button>
             </div>
         </div>
     </div>
 
     <script>
         // ==========================================
-        // 核心資料與初始化
+        // ⚠️ 1. Firebase 雲端資料庫設定區 ⚠️
         // ==========================================
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_GX-N_akogc9Xx9fZmmahVdp057AJ_CY",
+            authDomain: "tokyo-2026-4e56d.firebaseapp.com",
+            databaseURL: "https://tokyo-2026-4e56d-default-rtdb.firebaseio.com",
+            projectId: "tokyo-2026-4e56d",
+            storageBucket: "tokyo-2026-4e56d.firebasestorage.app",
+            messagingSenderId: "406716874155",
+            appId: "1:406716874155:web:40d841d3c16dd5c65ea6ee"
+        };
+
+        // 舊的試算表網址 (僅用於第一次無資料時的自動匯入)
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=2029826991&single=true&output=csv"; 
-        const HOTEL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=1489130274&single=true&output=csv";
-        const FLIGHT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=1349483223&single=true&output=csv";
-
-        let allData = []; 
-        let hotelData = [];
-        let parsedFlights = [];
-        let FLIGHT_EVENTS = [];
         
-        // 退房事件 (按日期、飯店、最晚退房時間)
-        const CHECKOUT_SCHEDULE = [
-            { date: '11/17', time: '11:00', name: '相鐵 FRESA INN' },
-            { date: '11/18', time: '10:00', name: '富士暁月湖凪Konagi' },
-            { date: '11/19', time: '11:00', name: '湯本富士屋酒店' },
-            { date: '11/22', time: '10:00', name: '押上 Airbnb' }
-        ];
+        // 成員名單
+        const MEMBERS = ['雅', '瑜廷', '潘', '千', '唷', '超', '傑', '尚軒', '阿文', '鈺峰'];
 
-        // 每日入住飯店清單
-        const OVERNIGHT_SCHEDULE = {
-            '11/14': '相鐵 FRESA INN',
-            '11/15': '相鐵 FRESA INN',
-            '11/16': '相鐵 FRESA INN',
-            '11/17': '富士暁月湖凪Konagi',
-            '11/18': '湯本富士屋酒店',
-            '11/19': '押上 Airbnb',
-            '11/20': '押上 Airbnb',
-            '11/21': '押上 Airbnb'
-            // 11/22 全員回台，無入住
-        };
-
-        // 每個人的在日行程區間 (start ~ end，含當天)
-        const MEMBER_STAY_RANGE = {
-            '雅': { start: '11/14', end: '11/22' },
-            '瑜廷': { start: '11/14', end: '11/22' },
-            '潘': { start: '11/14', end: '11/22' },
-            '千': { start: '11/14', end: '11/19' },
-            '唷': { start: '11/14', end: '11/22' },
-            '超': { start: '11/14', end: '11/22' },
-            '傑': { start: '11/14', end: '11/22' },
-            '唷、超、傑': { start: '11/14', end: '11/22' },
-            '尚軒': { start: '11/15', end: '11/19' },
-            '阿文': { start: '11/19', end: '11/22' },
-            '鈺峰': { start: '11/19', end: '11/22' }
-        };
-
-        let uniqueDates = []; 
-        let uniqueMembers = new Set();
+        // 全域變數
+        let db;
+        let currentUserIdentity = null;
+        let globalItinerary = {}; 
         let currentFilter = 'all'; 
-        let currentDate = null;
-        let currentFlightFilter = 'all';
-
-        const SHOP_KEY = 'tokyo_shop_26';
-        const LUG_KEY = 'tokyo_lug_26';
-        const TODO_KEY = 'tokyo_todo_26';
+        let currentDate = '11/14';
+        let sortableInstance = null;
         
-        let shoppingData = JSON.parse(localStorage.getItem(SHOP_KEY)) || [];
-        let luggageData = JSON.parse(localStorage.getItem(LUG_KEY)) || [];
-        let todoData = JSON.parse(localStorage.getItem(TODO_KEY)) || [];
+        let shoppingData = [];
+        let luggageData = [];
+        let todoData = [];
 
-        function normalizeName(name) {
-            return name.replace(/仁傑/g, '傑');
+        // ==========================================
+        // 初始化流程
+        // ==========================================
+        window.onload = () => {
+            // 初始化 Firebase
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+
+            // 生成成員選單與 Checkbox
+            renderMemberSelectors();
+
+            // 檢查身分
+            currentUserIdentity = localStorage.getItem('tokyo_identity_26');
+            if (!currentUserIdentity) {
+                document.getElementById('identity-modal').style.display = 'flex';
+                document.getElementById('loading').style.display = 'none';
+            } else {
+                startApp();
+            }
+        };
+
+        function renderMemberSelectors() {
+            const grid = document.getElementById('identity-grid');
+            const paxGrid = document.getElementById('iti-pax-grid');
+            grid.innerHTML = ''; paxGrid.innerHTML = '';
+            
+            MEMBERS.forEach(m => {
+                // 身分按鈕
+                let btn = document.createElement('button');
+                btn.className = 'identity-btn'; btn.innerText = m;
+                btn.onclick = () => {
+                    localStorage.setItem('tokyo_identity_26', m);
+                    currentUserIdentity = m;
+                    document.getElementById('identity-modal').style.display = 'none';
+                    startApp();
+                };
+                grid.appendChild(btn);
+
+                // 行程表單的複選框
+                paxGrid.innerHTML += `
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="iti-pax" value="${m}"> ${m}
+                    </label>
+                `;
+            });
         }
 
-        window.onload = () => {
-            initData();
+        function showIdentityModal() {
+            document.getElementById('identity-modal').style.display = 'flex';
+        }
+
+        function startApp() {
+            document.getElementById('user-badge').innerText = '👤 ' + currentUserIdentity;
+            document.getElementById('loading').innerText = '正在從雲端載入行程資料...';
+            document.getElementById('loading').style.display = 'block';
+
+            // 載入個人清單 (LocalStorage，不互相連動)
+            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || [];
+            luggageData = JSON.parse(localStorage.getItem(`lug_${currentUserIdentity}`)) || [];
+            
+            // 載入個人待辦 (Firebase 雲端，但不互相連動)
+            db.ref(`users/${currentUserIdentity}/todo`).on('value', snap => {
+                todoData = [];
+                if (snap.exists()) {
+                    let td = snap.val();
+                    for(let key in td) { td[key].id = key; todoData.push(td[key]); }
+                }
+                renderTodoList();
+            });
+
             renderShoppingList();
             renderLuggageList();
-            renderTodoList();
-        };
 
-        function initData() {
-            Promise.all([
-                new Promise((res, rej) => Papa.parse(CSV_URL + '&t=' + Date.now(), {
-                    download: true, header: true, skipEmptyLines: true,
-                    transformHeader: h => h.trim().replace(/^\ufeff/, ''),
-                    complete: res, error: rej
-                })),
-                new Promise((res, rej) => Papa.parse(HOTEL_CSV_URL + '&t=' + Date.now(), {
-                    download: true, header: true, skipEmptyLines: true,
-                    transformHeader: h => h.trim().replace(/^\ufeff/, ''),
-                    complete: res, error: rej
-                })),
-                new Promise((res, rej) => Papa.parse(FLIGHT_CSV_URL + '&t=' + Date.now(), {
-                    download: true, header: true, skipEmptyLines: true,
-                    transformHeader: h => h.trim().replace(/^\ufeff/, ''),
-                    complete: res, error: rej
-                }))
-            ]).then(results => {
-                allData = results[0].data;
-                hotelData = results[1].data;
-                let rawFlightData = results[2].data;
-                
-                document.getElementById('loading').style.display = 'none';
-                
-                parseFlightsData(rawFlightData);
-                processData(); 
-                
-                renderFilters(); 
-                renderDateTabs(); 
-                renderItinerary();
-                renderHotels();
-                
-                renderFlightFilters();
-                renderFlightsTab();
+            // 檢查是否需要匯入舊 CSV 資料
+            db.ref('system/migrated').once('value').then(snap => {
+                if (!snap.exists()) {
+                    performMigrationFromCSV();
+                } else {
+                    listenToItinerary();
+                }
             }).catch(err => {
-                document.getElementById('loading').innerHTML = '資料讀取失敗或解析錯誤：' + String(err);
+                document.getElementById('loading').innerHTML = "資料庫讀取權限錯誤！請確認 Firebase 的 Realtime Database 規則是否設為 Test Mode (true)。";
             });
-        }
-
-        function parseFlightsData(raw) {
-            let currentDir = 'inbound';
-            let currentDt = '';
-            
-            raw.forEach(row => {
-                let keys = Object.keys(row);
-                let paxRaw = String(row['朋朋'] || row['姓名'] || (keys[0] ? row[keys[0]] : '') || '').trim();
-                if (!paxRaw) return;
-                
-                if (paxRaw.includes('去程')) { currentDir = 'inbound'; return; }
-                if (paxRaw.includes('回程')) { currentDir = 'outbound'; return; }
-                if (paxRaw.match(/^\d{1,2}\/\d{1,2}/)) { currentDt = paxRaw; return; }
-                if (paxRaw === '朋朋' || paxRaw === '姓名') return;
-                
-                let flightNo = String(row['航班'] || (keys[1] ? row[keys[1]] : '') || '').trim();
-                let depTime = String(row['起飛時間'] || (keys[2] ? row[keys[2]] : '') || '').trim();
-                let arrTime = String(row['抵達時間'] || (keys[3] ? row[keys[3]] : '') || '').trim();
-                
-                parsedFlights.push({
-                    direction: currentDir,
-                    date: currentDt,
-                    pax: normalizeName(paxRaw),
-                    paxRaw: paxRaw,
-                    flightNo: flightNo ? flightNo : '待填',
-                    depTime: depTime ? depTime : '待填',
-                    arrTime: arrTime ? arrTime : '待填'
-                });
-            });
-            
-            parsedFlights.forEach(f => {
-                if (f.flightNo === '待填' && f.depTime === '待填' && f.arrTime === '待填') return;
-                
-                let isOutbound = f.direction === 'outbound';
-                let time = isOutbound ? f.depTime : f.arrTime;
-                let name = isOutbound ? `🛫 ${f.paxRaw} 航班起飛` : `🛬 ${f.paxRaw} 降落抵達`;
-                let cleanDate = f.date.split(' ')[0];
-                
-                let paxList = f.pax.split(/、|,|，/).map(p => p.trim());
-                paxList.push(f.pax); 
-                
-                if(time && time !== '待填') {
-                    FLIGHT_EVENTS.push({ date: cleanDate, time: time, name: name, pax: paxList, flightNo: f.flightNo });
-                }
-            });
-        }
-
-        function switchView(viewName, element) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${viewName}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            window.scrollTo(0,0);
-        }
-
-        function switchSubView(parentId, subName, element) {
-            const parent = document.getElementById(parentId);
-            parent.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-            document.getElementById(`sub-${subName}`).classList.add('active');
-            parent.querySelectorAll('.list-tab-btn').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
         }
 
         // ==========================================
-        // 行程表邏輯
+        // 核心：Firebase 資料監聽與渲染
         // ==========================================
-        function getVal(row, keys) {
-            if (!row || typeof row !== 'object') return '';
-            for (let k of keys) {
-                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
-                    return String(row[k]).trim();
+        function listenToItinerary() {
+            db.ref('itinerary').on('value', snapshot => {
+                globalItinerary = {};
+                if (snapshot.exists()) {
+                    globalItinerary = snapshot.val();
                 }
-            }
-            for (let rk in row) {
-                if (!rk) continue;
-                let clean = String(rk).trim().replace(/^\ufeff/, '');
-                for (let k of keys) {
-                    if (clean.toLowerCase() === String(k).toLowerCase()) {
-                        if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== '') {
-                            return String(row[rk]).trim();
-                        }
-                    }
-                }
-            }
-            return '';
+                document.getElementById('loading').style.display = 'none';
+                updateFiltersAndTabs();
+                renderItinerary();
+            });
         }
 
-        
-        function autoFixHeaders(dataArray) {
-            if (!dataArray || dataArray.length === 0) return dataArray;
-            // 檢查第一筆資料的值，是否剛好是我們預期的表頭（代表表頭被擠到資料列了）
-            let firstRowValues = Object.values(dataArray[0]);
-            let looksLikeHeader = false;
-            let dateKey = '';
-            for (let val of firstRowValues) {
-                let v = String(val).trim();
-                if (v === '日期' || v === 'Date') {
-                    looksLikeHeader = true;
-                    break;
-                }
-            }
+        function updateFiltersAndTabs() {
+            const fContainer = document.getElementById('filter-container');
+            const dContainer = document.getElementById('date-tabs');
             
-            if (looksLikeHeader) {
-                console.log("偵測到表頭偏移，自動修正中...");
-                let newHeaders = dataArray[0];
-                let fixedData = [];
-                for (let i = 1; i < dataArray.length; i++) {
-                    let oldRow = dataArray[i];
-                    let newRow = {};
-                    for (let key in oldRow) {
-                        let newKey = newHeaders[key];
-                        if (newKey && String(newKey).trim() !== '') {
-                            newRow[newKey] = oldRow[key];
-                        } else {
-                            newRow[key] = oldRow[key];
-                        }
-                    }
-                    fixedData.push(newRow);
-                }
-                return fixedData;
-            }
-            return dataArray;
-        }
-
-        function processData() {
-            uniqueDates = [];
-            uniqueMembers = new Set();
-            allData.forEach(row => {
-                let d = getVal(row, ['日期', 'Date', 'date']);
-                let p = getVal(row, ['參與者', '成員', '誰', 'Pax']);
-                if (d && !uniqueDates.includes(d)) uniqueDates.push(d);
-                if (p) {
-                    p.split(/[,、，]/).map(m => normalizeName(m.trim())).filter(m => m !== '').forEach(m => uniqueMembers.add(m));
-                }
+            // 生成過濾器
+            fContainer.innerHTML = `<button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">全員行程</button>`;
+            MEMBERS.forEach(m => {
+                fContainer.innerHTML += `<button class="filter-btn ${currentFilter===m?'active':''}" onclick="setFilter('${m}')">${m}</button>`;
             });
-            if (uniqueDates.length > 0) {
-                if (!currentDate || !uniqueDates.includes(currentDate)) {
-                    currentDate = uniqueDates[0];
-                }
-            }
-        }
 
-        function renderFilters() {
-            const container = document.getElementById('filter-container');
-            container.innerHTML = '';
-            
-            const btnAll = document.createElement('button');
-            btnAll.className = 'filter-btn active';
-            btnAll.innerText = '全員行程';
-            btnAll.onclick = function() {
-                document.querySelectorAll('#filter-container .filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active'); currentFilter = 'all'; renderItinerary();
-            };
-            container.appendChild(btnAll);
-
-            uniqueMembers.forEach(member => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn'; btn.innerText = member;
-                btn.onclick = () => {
-                    document.querySelectorAll('#filter-container .filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active'); currentFilter = member; renderItinerary();
-                };
-                container.appendChild(btn);
+            // 生成日期 (固定 11/14 ~ 11/22)
+            let dates = ['11/14','11/15','11/16','11/17','11/18','11/19','11/20','11/21','11/22'];
+            dContainer.innerHTML = '';
+            dates.forEach(d => {
+                let isActive = currentDate === d ? 'active' : '';
+                let dayMap = {'11/14':'六','11/15':'日','11/16':'一','11/17':'二','11/18':'三','11/19':'四','11/20':'五','11/21':'六','11/22':'日'};
+                dContainer.innerHTML += `
+                    <div class="date-tab ${isActive}" onclick="setDate('${d}')">
+                        <span class="day">${dayMap[d]}</span>
+                        <span class="date">${d.split('/')[1]}</span>
+                    </div>
+                `;
             });
         }
 
-        function renderDateTabs() {
-            const container = document.getElementById('date-tabs');
-            container.innerHTML = '';
-            uniqueDates.forEach((dateStr, index) => {
-                let parts = dateStr.split(' ');
-                const tab = document.createElement('div');
-                tab.className = `date-tab ${index === 0 ? 'active' : ''}`;
-                tab.innerHTML = `<span class="day">${parts[1]||''}</span><span class="date">${(parts[0]||'').split('/')[1] || parts[0]}</span>`;
-                tab.onclick = () => {
-                    document.querySelectorAll('.date-tab').forEach(t => t.classList.remove('active'));
-                    tab.classList.add('active'); currentDate = dateStr; renderItinerary();
-                };
-                container.appendChild(tab);
-            });
-        }
+        function setFilter(f) { currentFilter = f; updateFiltersAndTabs(); renderItinerary(); }
+        function setDate(d) { currentDate = d; updateFiltersAndTabs(); renderItinerary(); }
 
         function renderItinerary() {
             const container = document.getElementById('itinerary-container');
             container.innerHTML = '';
             
-            if (!currentDate && uniqueDates.length > 0) currentDate = uniqueDates[0];
-            if (!currentDate) {
-                let debugInfo = "【系統自動偵測報告】<br>無法從試算表找到對應的行程。<br>";
-                debugInfo += "1. 行程表網址是否給錯？<br>";
-                if (allData.length === 0) {
-                    debugInfo += "2. 試算表目前是空的，或是沒有發布成功。<br>";
-                } else {
-                    debugInfo += "2. 目前讀取到的表頭名稱為：<br><b style='color:#3D405B;'>" + Object.keys(allData[0]).join(', ') + "</b><br>";
-                    debugInfo += "（如果看到的是「航班、起飛時間」，代表你貼成航班表了！）";
-                }
-                container.innerHTML = `<div style="text-align:center; padding: 20px; color:#8187A1; line-height: 1.6; background:#FFF4F0; border-radius:16px; margin:20px; border:2px dashed #E07A5F;">
-                    <div style="font-weight:900; margin-bottom:10px; font-size:16px; color:#E07A5F;">⚠️ 讀取失敗</div>
-                    <div style="font-size:13px; color:#E07A5F; text-align:left;">${debugInfo}</div>
-                </div>`;
-                return;
-            }
-            
-            // 1. 一般行程
-            const filteredData = allData.filter(row => {
-                let rowDate = getVal(row, ['日期', 'Date', 'date']);
-                const matchDate = rowDate === currentDate;
-                let matchMember = true;
-                let rowPax = getVal(row, ['參與者', '成員', 'Pax']);
-                if (currentFilter !== 'all' && rowPax) {
-                    let normPax = rowPax.split(/[,、，]/).map(m => normalizeName(m.trim()));
-                    matchMember = normPax.includes(currentFilter);
-                }
-                return matchDate && matchMember;
-            });
-
+            // 整理今日要顯示的行程
             let dailyItems = [];
-            filteredData.forEach((row, rowIndex) => {
-                let startTime = getVal(row, ['開始時間', 'Start', 'Time']);
-                let period = getVal(row, ['時段', 'Period']);
-                let sortTimeStr = startTime;
-
-                if (!sortTimeStr) {
-                    let p = String(period || '');
-                    if (p.includes('早') || p.includes('早餐')) sortTimeStr = '08:30';
-                    else if (p.includes('上午')) sortTimeStr = '10:00';
-                    else if (p.includes('午餐') || p.includes('中午')) sortTimeStr = '12:01';
-                    else if (p.includes('下午')) sortTimeStr = '13:01';
-                    else if (p.includes('晚餐')) sortTimeStr = '17:01';
-                    else if (p.includes('晚上') || p.includes('宵夜')) sortTimeStr = '18:01';
-                    else sortTimeStr = '12:00';
-                }
-                
-                dailyItems.push({ type: 'itinerary', sortTime: sortTimeStr, order: rowIndex, data: row });
-            });
-
-            // 2. 航班穿插事件
-            let todayStr = currentDate ? String(currentDate).split(' ')[0] : '';
-            FLIGHT_EVENTS.forEach(flight => {
-                if (flight.date === todayStr) {
+            for (let key in globalItinerary) {
+                let row = globalItinerary[key];
+                if (row.date === currentDate) {
+                    // 過濾參與者
                     let match = false;
-                    if (currentFilter === 'all') match = true;
-                    else if (flight.pax.includes(currentFilter)) match = true;
-                    if (match) dailyItems.push({ type: 'flight', sortTime: flight.time, data: flight });
-                }
-            });
-
-            // 3. 退房事件 (若該成員當天早上在東京且當天有退房)
-            CHECKOUT_SCHEDULE.forEach(co => {
-                if (co.date === todayStr) {
-                    let showCheckout = false;
-                    if (currentFilter === 'all') {
-                        showCheckout = true;
-                    } else {
-                        let stay = MEMBER_STAY_RANGE[currentFilter];
-                        // 只有當前成員在該日(且不是剛抵達那天早上退房)才顯示
-                        if (stay && todayStr > stay.start && todayStr <= stay.end) {
-                            showCheckout = true;
-                        }
-                    }
-                    if (showCheckout) {
-                        dailyItems.push({ type: 'checkout', sortTime: '00:00', data: co });
+                    if (currentFilter === 'all') { match = true; } 
+                    else if (row.pax && row.pax.includes(currentFilter)) { match = true; }
+                    
+                    if (match) {
+                        row.id = key;
+                        dailyItems.push(row);
                     }
                 }
-            });
+            }
 
-            // 4. 排序
+            // 排序 (依據 customOrder, 若無則依開始時間)
             dailyItems.sort((a, b) => {
-                let parseTime = (t) => {
-                    if (!t) return 9999;
-                    let num = parseInt(t.replace(':', ''), 10);
-                    return isNaN(num) ? 9999 : num;
-                };
-                let diff = parseTime(a.sortTime) - parseTime(b.sortTime);
-                if (diff !== 0) return diff;
-                return (a.order || 0) - (b.order || 0); // 時間相同時，嚴格依照試算表原本的上下順序
+                let orderA = a.order !== undefined ? a.order : 9999;
+                let orderB = b.order !== undefined ? b.order : 9999;
+                if (orderA !== orderB) return orderA - orderB;
+                
+                // 備用時間排序
+                let tA = parseInt((a.startTime||'99:99').replace(':',''));
+                let tB = parseInt((b.startTime||'99:99').replace(':',''));
+                return (tA || 9999) - (tB || 9999);
             });
 
             if (dailyItems.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8187A1; font-weight:900;">此日無專屬行程</div>';
+                container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8187A1; font-weight:900;">此日無行程</div>';
+                initSortable();
                 return;
             }
 
-            // 5. 渲染
-            dailyItems.forEach(item => {
-                if (item.type === 'checkout') {
-                    let co = item.data;
-                    let card = document.createElement('div');
-                    card.className = 'card theme-hotel';
-                    card.style.borderLeft = '6px solid #B5838D';
-                    card.style.background = 'linear-gradient(120deg, #FFFFFF 60%, #FAF5F6 100%)';
-                    card.innerHTML = `
-                        <div class="card-content">
-                            <div class="time-badge" style="background:#F5EAEB; color:#6D6875;">🕒 最晚退房 ${co.time}</div>
-                            <div class="card-title" style="color:#6D6875; margin-bottom:0; font-size: 17px;">🏨 退房 ${co.name}</div>
-                        </div>
-                        <div class="card-watermark">🧳</div>
-                    `;
-                    container.appendChild(card);
-                } else if (item.type === 'flight') {
-                    let f = item.data;
-                    let card = document.createElement('div');
-                    card.className = 'card theme-transport';
-                    card.style.borderLeft = '6px solid #8A92A6';
-                    card.style.background = 'linear-gradient(120deg, #FFFFFF 60%, #F0F2F5 100%)';
-                    card.innerHTML = `
-                        <div class="card-content">
-                            <div class="time-badge" style="background:#E2E5F0; color:#555E7B;">🕒 ${f.time}</div>
-                            <div class="card-title" style="color:#555E7B; margin-bottom:0; font-size: 17px;">${f.name}</div>
-                        </div>
-                        <div class="card-watermark">✈️</div>
-                    `;
-                    container.appendChild(card);
-                } else {
-                    let row = item.data;
-                    const card = document.createElement('div');
-                    
-                    let themeClass = 'theme-default';
-                    let watermark = '🍁';
-                    if (row['tag']) {
-                        let t = row['tag'];
-                        if (t.includes('吃') || t.includes('食') || t.includes('餐')) { themeClass = 'theme-food'; watermark = '🍜'; }
-                        else if (t.includes('景點') || t.includes('看') || t.includes('遊')) { themeClass = 'theme-attraction'; watermark = '⛩️'; }
-                        else if (t.includes('機') || t.includes('交通') || t.includes('車') || t.includes('其他')) { themeClass = 'theme-transport'; watermark = '✈️'; }
-                        else if (t.includes('住') || t.includes('飯店')) { themeClass = 'theme-hotel'; watermark = '🏨'; }
-                        else if (t.includes('買') || t.includes('購物')) { themeClass = 'theme-shop'; watermark = '🛍️'; }
-                    }
-                    card.className = `card ${themeClass}`;
+            dailyItems.forEach(row => {
+                let themeClass = 'theme-default';
+                let watermark = '🍁';
+                let t = row.tag || '';
+                if (t.includes('吃') || t.includes('餐')) { themeClass = 'theme-food'; watermark = '🍜'; }
+                else if (t.includes('景點') || t.includes('遊')) { themeClass = 'theme-attraction'; watermark = '⛩️'; }
+                else if (t.includes('交通') || t.includes('機')) { themeClass = 'theme-transport'; watermark = '✈️'; }
+                else if (t.includes('住') || t.includes('退房')) { themeClass = 'theme-hotel'; watermark = '🏨'; }
+                else if (t.includes('買') || t.includes('購物')) { themeClass = 'theme-shop'; watermark = '🛍️'; }
 
-                    let period = getVal(row, ['時段', 'Period']);
-                    let start = getVal(row, ['開始時間', 'Start']);
-                    let end = getVal(row, ['結束時間', 'End']);
-                    let tagVal = getVal(row, ['tag', 'Tag', 'TAG']);
-                    let titleVal = getVal(row, ['行程名稱', '行程', 'Title', 'Name']) || '未命名行程';
-                    let noteVal = getVal(row, ['行程細項與筆記', '筆記', 'Notes', 'Note']);
-                    let mapUrl = getVal(row, ['google map', 'Google Map', '地圖', 'map']);
-                    let trafficVal = getVal(row, ['交通路線', '交通', 'Traffic']);
-                    let linkVal = getVal(row, ['相關連結', '連結', 'Link', 'Links']);
+                let timeParts = [];
+                if(row.period) timeParts.push(row.period);
+                if(row.startTime && row.endTime) timeParts.push(`${row.startTime} - ${row.endTime}`);
+                else if(row.startTime) timeParts.push(row.startTime);
+                let timeHtml = timeParts.length > 0 ? `<div class="time-badge">🕒 ${timeParts.join(' ')}</div>` : '';
+                
+                let paxHtml = row.pax ? `<div class="tag-pill" style="background:#E8F0FE; color:#1967D2;">👤 ${row.pax.join(', ')}</div>` : '';
+                let tagHtml = row.tag ? `<div class="tag-pill">${row.tag}</div>` : '';
+                let noteHtml = row.notes ? `<div class="card-note">${row.notes.replace(/\n/g, '<br>')}</div>` : '';
+                
+                let mapHtml = row.mapUrl ? `<a href="${row.mapUrl}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 開啟地圖</a>` : '';
 
-                    let timeParts = [];
-                    if (period) timeParts.push(period);
-                    if (start && end) timeParts.push(`${start} - ${end}`);
-                    else if (start) timeParts.push(start);
-                    let timeHtml = timeParts.length > 0 ? `<div class="time-badge">🕒 ${timeParts.join(' ')}</div>` : '';
-                    
-                    let tagHtml = tagVal ? `<div class="tag-pill">${tagVal}</div>` : '';
-                    let titleHtml = `<div class="card-title">${titleVal}</div>`;
-                    
-                    let noteHtml = noteVal ? `<div class="card-note">${noteVal.replace(/\n/g, '<br>')}</div>` : '';
-                    let mapHtml = mapUrl ? `<a href="${mapUrl}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 點擊開啟地圖</a>` : '';
+                let detailsContent = '';
+                if (row.traffic) detailsContent += `<p><strong>🚌 交通路線：</strong><br>${row.traffic.replace(/\n/g, '<br>')}</p>`;
+                if (row.links) detailsContent += `<p><strong>🔗 相關連結：</strong><br>${row.links.replace(/\n/g, '<br>')}</p>`;
+                let detailsHtml = detailsContent ? `<button class="expand-btn" onclick="toggleDetails(this)">顯示詳細資訊 ▾</button><div class="details-box" style="display:none;">${detailsContent}</div>` : '';
 
-                    let detailsContent = '';
-                    if (trafficVal) detailsContent += `<p><strong>🚌 交通路線：</strong><br>${trafficVal.replace(/\n/g, '<br>')}</p>`;
-                    if (linkVal) {
-                        let links = linkVal.split('\n').map(l => {
-                            let url = l.trim(); if (!url.startsWith('http')) url = 'http://' + url;
-                            return `<a href="${url}" target="_blank" style="color:var(--primary-color); word-break: break-all;">${l}</a>`;
-                        }).join('<br>');
-                        detailsContent += `<p><strong>🔗 相關連結：</strong><br>${links}</p>`;
-                    }
-                    let expandBtnHtml = ''; let detailsHtml = '';
-                    if (detailsContent !== '') {
-                        detailsHtml = `<div class="details-box" style="display:none;">${detailsContent}</div>`;
-                        expandBtnHtml = `<button class="expand-btn" onclick="toggleDetails(this)">顯示詳細資訊 ▾</button>`;
-                    }
+                // 拖曳把手與編輯按鈕 (若在個人過濾模式下不顯示拖曳)
+                let dragHtml = currentFilter === 'all' ? `<div class="drag-handle">⋮⋮</div>` : '';
+                let pl = currentFilter === 'all' ? '36px' : '18px';
 
-                    card.innerHTML = `
-                        <div class="card-content">
-                            ${timeHtml}${titleHtml}${noteHtml}${tagHtml}${expandBtnHtml}${detailsHtml}${mapHtml}
-                        </div>
-                        <div class="card-watermark">${watermark}</div>
-                    `;
-                    container.appendChild(card);
-                }
+                let card = document.createElement('div');
+                card.className = `card ${themeClass}`;
+                card.style.paddingLeft = pl;
+                card.dataset.id = row.id;
+                
+                card.innerHTML = `
+                    ${dragHtml}
+                    <div class="card-actions">
+                        <div class="icon-btn" onclick="editItinerary('${row.id}')">✏️</div>
+                        <div class="icon-btn" onclick="delItinerary('${row.id}')">🗑️</div>
+                    </div>
+                    <div class="card-content">
+                        ${timeHtml}${paxHtml}${tagHtml}
+                        <div class="card-title">${row.title}</div>
+                        ${noteHtml}${detailsHtml}${mapHtml}
+                    </div>
+                    <div class="card-watermark">${watermark}</div>
+                `;
+                container.appendChild(card);
             });
 
-            // 6. 判斷當晚入住飯店
-            let showOvernight = false;
-            let expectedHotel = OVERNIGHT_SCHEDULE[todayStr];
-
-            if (expectedHotel) {
-                if (currentFilter === 'all') {
-                    showOvernight = true;
-                } else {
-                    let stay = MEMBER_STAY_RANGE[currentFilter];
-                    // 只有當前成員當晚仍在日本 (小於回程日) 且已抵達 (>= start) 才顯示入住
-                    if (stay && todayStr >= stay.start && todayStr < stay.end) {
-                        showOvernight = true;
-                    }
-                }
-            }
-
-            if (showOvernight && expectedHotel) {
-                let hName = expectedHotel;
-                let hMap = "";
-                
-                // 1. 優先從 hotelData CSV 尋找匹配
-                let cleanTarget = hName.replace(/\s+/g, '').toLowerCase();
-                for (let h of hotelData) {
-                    let nameInCsv = (h['飯店名稱'] || h['飯店'] || h['Name'] || Object.values(h)[0] || '').replace(/\s+/g, '').toLowerCase();
-                    let urlInCsv = "";
-                    for (let key in h) {
-                        let k = key.toLowerCase();
-                        if (k.includes('map') || k.includes('地圖') || k.includes('導航')) {
-                            urlInCsv = h[key];
-                            break;
-                        }
-                    }
-                    if (nameInCsv && (nameInCsv.includes(cleanTarget) || cleanTarget.includes(nameInCsv) || 
-                       (cleanTarget.includes('fresa') && nameInCsv.includes('fresa')) ||
-                       (cleanTarget.includes('konagi') && nameInCsv.includes('konagi')) || 
-                       (cleanTarget.includes('airbnb') && nameInCsv.includes('airbnb')) ||
-                       (cleanTarget.includes('富士屋') && nameInCsv.includes('富士屋')))) {
-                        hMap = urlInCsv;
-                        break;
-                    }
-                }
-
-                // 2. 備用字典：若 CSV 未讀取到或欄位空白，直接使用各飯店正確導航連結
-                if (!hMap) {
-                    const FALLBACK_HOTEL_MAPS = {
-                        '相鐵 FRESA INN': 'https://maps.app.goo.gl/x6TNUoGPjsmMHNgZ6',
-                        '富士暁月湖凪Konagi': 'https://maps.google.com/?q=富士暁月湖凪+Konagi',
-                        '湯本富士屋酒店': 'https://maps.google.com/?q=湯本富士屋ホテル',
-                        '押上 Airbnb': 'https://maps.google.com/?q=押上'
-                    };
-                    hMap = FALLBACK_HOTEL_MAPS[hName] || '';
-                }
-                
-                let mapBtn = hMap ? `<a href="${hMap}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 點擊開啟地圖</a>` : '';
-                
-                let hotelCard = document.createElement('div');
-                hotelCard.className = 'card theme-hotel';
-                hotelCard.style.marginTop = '16px';
-                hotelCard.innerHTML = `
-                    <div class="card-content">
-                        <div style="font-size:13px; color:#6D6875; font-weight:900; margin-bottom:6px;">🌙 今晚入住</div>
-                        <div class="card-title" style="margin-bottom:12px;">${hName}</div>
-                        ${mapBtn}
-                    </div>
-                    <div class="card-watermark">🏨</div>
-                `;
-                container.appendChild(hotelCard);
-            }
+            initSortable();
         }
 
         function toggleDetails(btn) {
@@ -1021,172 +733,217 @@
         }
 
         // ==========================================
-        // 航班與飯店渲染 (動態 CSV 抓取)
+        // 拖曳排序邏輯 (SortableJS)
         // ==========================================
-        function renderFlightFilters() {
-            const container = document.getElementById('flight-filter-container');
-            container.innerHTML = '';
+        function initSortable() {
+            const el = document.getElementById('itinerary-container');
+            if (sortableInstance) sortableInstance.destroy();
             
-            const btnAll = document.createElement('button');
-            btnAll.className = 'filter-btn active';
-            btnAll.innerText = '全部航班';
-            btnAll.onclick = function() {
-                document.querySelectorAll('#flight-filter-container .filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active'); currentFlightFilter = 'all'; renderFlightsTab();
+            if (currentFilter === 'all') {
+                sortableInstance = new Sortable(el, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: function () {
+                        // 拖曳結束後，將當前畫面上的所有卡片順序寫回 Firebase
+                        let items = el.querySelectorAll('.card');
+                        let updates = {};
+                        items.forEach((item, index) => {
+                            let id = item.dataset.id;
+                            updates[`itinerary/${id}/order`] = index;
+                        });
+                        // 顯示存檔中
+                        document.getElementById('loading').style.display = 'block';
+                        document.getElementById('loading').innerText = '儲存順序中...';
+                        db.ref().update(updates).then(() => {
+                            document.getElementById('loading').style.display = 'none';
+                        });
+                    }
+                });
+            }
+        }
+
+        // ==========================================
+        // 行程表單 (CRUD)
+        // ==========================================
+        function openItineraryModal() {
+            document.getElementById('iti-id').value = '';
+            document.getElementById('iti-title').value = '';
+            document.getElementById('iti-date').value = currentDate;
+            document.getElementById('iti-period').value = '上午';
+            document.getElementById('iti-start').value = '';
+            document.getElementById('iti-end').value = '';
+            document.getElementById('iti-tag').value = '';
+            document.getElementById('iti-map').value = '';
+            document.getElementById('iti-traffic').value = '';
+            document.getElementById('iti-notes').value = '';
+            document.getElementById('iti-links').value = '';
+            
+            document.querySelectorAll('input[name="iti-pax"]').forEach(cb => cb.checked = true); // 預設全選
+            
+            document.getElementById('iti-modal-title').innerText = '新增行程';
+            document.getElementById('itinerary-modal').style.display = 'flex';
+        }
+
+        function editItinerary(id) {
+            let row = globalItinerary[id];
+            if(!row) return;
+            document.getElementById('iti-id').value = id;
+            document.getElementById('iti-title').value = row.title || '';
+            document.getElementById('iti-date').value = row.date || currentDate;
+            document.getElementById('iti-period').value = row.period || '上午';
+            document.getElementById('iti-start').value = row.startTime || '';
+            document.getElementById('iti-end').value = row.endTime || '';
+            document.getElementById('iti-tag').value = row.tag || '';
+            document.getElementById('iti-map').value = row.mapUrl || '';
+            document.getElementById('iti-traffic').value = row.traffic || '';
+            document.getElementById('iti-notes').value = row.notes || '';
+            document.getElementById('iti-links').value = row.links || '';
+            
+            document.querySelectorAll('input[name="iti-pax"]').forEach(cb => {
+                cb.checked = row.pax && row.pax.includes(cb.value);
+            });
+            
+            document.getElementById('iti-modal-title').innerText = '編輯行程';
+            document.getElementById('itinerary-modal').style.display = 'flex';
+        }
+
+        function saveItinerary() {
+            let id = document.getElementById('iti-id').value;
+            let title = document.getElementById('iti-title').value.trim();
+            if(!title) { alert("請輸入行程名稱！"); return; }
+            
+            let pax = [];
+            document.querySelectorAll('input[name="iti-pax"]:checked').forEach(cb => pax.push(cb.value));
+            
+            let data = {
+                title: title,
+                date: document.getElementById('iti-date').value,
+                period: document.getElementById('iti-period').value,
+                startTime: document.getElementById('iti-start').value,
+                endTime: document.getElementById('iti-end').value,
+                tag: document.getElementById('iti-tag').value,
+                mapUrl: document.getElementById('iti-map').value,
+                traffic: document.getElementById('iti-traffic').value,
+                notes: document.getElementById('iti-notes').value,
+                links: document.getElementById('iti-links').value,
+                pax: pax
             };
-            container.appendChild(btnAll);
 
-            let flightPax = new Set();
-            parsedFlights.forEach(f => {
-                f.paxRaw.split(/、|,|，/).map(p=>normalizeName(p.trim())).forEach(p => {
-                    if(p && p !== '去程' && p !== '回程' && !p.match(/^\d{1,2}\/\d{1,2}/)) {
-                        flightPax.add(p);
-                    }
-                });
-            });
-
-            flightPax.forEach(member => {
-                const btn = document.createElement('button');
-                btn.className = 'filter-btn'; btn.innerText = member;
-                btn.onclick = () => {
-                    document.querySelectorAll('#flight-filter-container .filter-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active'); currentFlightFilter = member; renderFlightsTab();
-                };
-                container.appendChild(btn);
-            });
+            if (id) {
+                // 更新
+                data.order = globalItinerary[id].order || 999;
+                db.ref(`itinerary/${id}`).set(data);
+            } else {
+                // 新增
+                data.order = 999; // 預設放最底
+                db.ref('itinerary').push(data);
+            }
+            closeModal('itinerary-modal');
         }
 
-        function renderFlightsTab() {
-            let container = document.getElementById('flights-ticket-container');
-            container.innerHTML = '';
-            
-            let inbounds = parsedFlights.filter(f => f.direction === 'inbound');
-            let outbounds = parsedFlights.filter(f => f.direction === 'outbound');
-            
-            if(currentFlightFilter !== 'all') {
-                inbounds = inbounds.filter(f => {
-                    let paxes = f.paxRaw.split(/、|,|，/).map(p=>normalizeName(p.trim()));
-                    return paxes.includes(currentFlightFilter) || normalizeName(f.paxRaw).includes(currentFlightFilter);
-                });
-                outbounds = outbounds.filter(f => {
-                    let paxes = f.paxRaw.split(/、|,|，/).map(p=>normalizeName(p.trim()));
-                    return paxes.includes(currentFlightFilter) || normalizeName(f.paxRaw).includes(currentFlightFilter);
-                });
-            }
-
-            if (inbounds.length > 0) {
-                let title = document.createElement('h3');
-                title.className = 'flight-date-title'; title.innerText = '🛬 去程航班 (DEPARTURE)';
-                container.appendChild(title);
-                inbounds.forEach(f => container.appendChild(createTicketEl(f, 'inbound')));
-            }
-            
-            if (outbounds.length > 0) {
-                let title = document.createElement('h3');
-                title.className = 'flight-date-title'; title.innerText = '🛫 回程航班 (RETURN)';
-                title.style.marginTop = '24px';
-                container.appendChild(title);
-                outbounds.forEach(f => container.appendChild(createTicketEl(f, 'outbound')));
-            }
-            
-            if(inbounds.length === 0 && outbounds.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:#8187A1; font-weight:900;">沒有符合的航班資料</div>`;
+        function delItinerary(id) {
+            if(confirm("確定要刪除這個行程嗎？（刪除後雲端同步消失）")) {
+                db.ref(`itinerary/${id}`).remove();
             }
         }
 
-        function createTicketEl(f, dir) {
-            let div = document.createElement('div');
-            div.className = 'ticket';
-            div.style.marginBottom = '16px';
-            
-            let isOut = dir === 'outbound';
-            let portFrom = isOut ? 'NRT' : 'TPE';
-            let portTo = isOut ? 'TPE' : 'NRT';
-            let portFromName = isOut ? '東京成田' : '台北桃園';
-            let portToName = isOut ? '台北桃園' : '東京成田';
-            let headerColor = isOut ? '#555E7B' : 'var(--text-main)';
-            let dateStr = f.date || '日期待填';
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-            let airline = '✈️ 待確認';
-            let fn = (f.flightNo || '').toUpperCase();
-            if(fn.startsWith('IT')) airline = '✈️ 台灣虎航 Tigerair';
-            else if(fn.startsWith('JX')) airline = '✈️ 星宇航空 STARLUX';
-            else if(fn.startsWith('CI')) airline = '✈️ 中華航空 China Airlines';
-            else if(fn.startsWith('BR')) airline = '✈️ 長榮航空 EVA Air';
-            else if(fn.startsWith('CX')) airline = '✈️ 國泰航空 Cathay Pacific';
-            else if(fn.startsWith('JL')) airline = '✈️ 日本航空 JAL';
-            else if(fn.startsWith('NH')) airline = '✈️ 全日空 ANA';
-            else if(fn.startsWith('GK')) airline = '✈️ 捷星航空 Jetstar';
-            else if(fn.startsWith('UA')) airline = '✈️ 聯合航空 United';
 
-            div.innerHTML = `
-                <div class="ticket-header" style="background:${headerColor}">
-                    <h3>${f.paxRaw}</h3><span class="airline">${airline}</span>
+        // ==========================================
+        // 初始化時從 Google 試算表匯入舊資料 (一次性)
+        // ==========================================
+        function performMigrationFromCSV() {
+            document.getElementById('loading').innerHTML = `
+                <div style="background:#FFF4F0; padding:20px; border-radius:16px; border:2px dashed #E07A5F;">
+                    <h3 style="color:#E07A5F; margin-bottom:10px;">🔄 系統首次初始化</h3>
+                    <p style="font-size:13px; color:#3D405B;">正在自動將舊版 Google 試算表的資料搬移到新的 Firebase 雲端資料庫...</p>
                 </div>
-                <div class="ticket-body">
-                    <div style="font-size:12px; color:${isOut?'var(--secondary-color)':'var(--primary-color)'}; font-weight:900; margin-bottom:10px;">
-                        ${isOut ? 'RETURN 回程' : 'DEPARTURE 去程'} - ${dateStr}
-                    </div>
-                    <div class="ticket-route">
-                        <div class="port"><h2>${portFrom}</h2><p>${portFromName}</p></div>
-                        <div class="plane-icon" style="${isOut ? 'transform: translateX(-50%) scaleX(-1);' : ''}">✈️</div>
-                        <div class="port"><h2>${portTo}</h2><p>${portToName}</p></div>
-                    </div>
-                    <div class="ticket-info">
-                        <div class="info-col"><label>班機</label><span>${f.flightNo}</span></div>
-                        <div class="info-col"><label>起飛</label><span>${f.depTime}</span></div>
-                        <div class="info-col"><label>抵達</label><span>${f.arrTime}</span></div>
-                    </div>
-                </div>
-                <div class="ticket-footer"><div class="barcode"></div></div>
             `;
-            return div;
-        }
-
-        function renderHotels() {
-            const container = document.getElementById('hotel-info-container');
-            container.innerHTML = '';
-            if(!hotelData || hotelData.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:#8187A1; font-weight:900;">無飯店資料，請檢查網址</div>';
-                return;
-            }
             
-            hotelData.forEach((row, index) => {
-                let html = '<div class="ticket" style="margin-bottom:24px;">';
-                let name = row['飯店名稱'] || row['飯店'] || row['Name'] || Object.values(row)[0] || `飯店 ${index+1}`;
-                html += `<div class="ticket-header" style="background:#8F94A6;"><h3>🏨 ${name}</h3></div>`;
-                html += `<div class="ticket-body" style="padding:20px;">`;
-                
-                for(let key in row) {
-                    if(key.includes('機場交通') || key.includes('飯店名稱') || key.includes('飯店')) continue;
-                    let val = row[key];
-                    if(!val || val.trim()==='') continue;
-                    
-                    if (val.startsWith('http')) {
-                        val = `<a href="${val}" target="_blank" style="color:var(--primary-color); font-weight:900; word-break:break-all;">📍 點擊開啟地圖</a>`;
-                    } else {
-                        val = val.replace(/\n/g, '<br>');
+            Papa.parse(CSV_URL + '&t=' + Date.now(), {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    let rows = results.data;
+                    let updates = {};
+                    let order = 0;
+
+                    // 防禦：尋找真實表頭列
+                    let headerIndex = -1;
+                    for (let i = 0; i < Math.min(5, rows.length); i++) {
+                        let vals = Object.values(rows[i]).map(v=>String(v).trim());
+                        if(vals.includes('日期') || vals.includes('Date')) { headerIndex = i; break; }
                     }
-                    html += `<div style="margin-bottom:16px; border-bottom: 1px dashed #eee; padding-bottom: 8px;">
-                                <label style="font-size:12px; color:var(--text-light); font-weight:900; display:block; margin-bottom:4px;">${key}</label>
-                                <div style="font-size:15px; font-weight:900; color:var(--text-main);">${val}</div>
-                             </div>`;
+
+                    let cleanRows = [];
+                    if(headerIndex !== -1) {
+                        let headers = rows[headerIndex];
+                        for(let i = headerIndex+1; i < rows.length; i++) {
+                            let r = {};
+                            for(let k in rows[i]) r[headers[k] || k] = rows[i][k];
+                            cleanRows.push(r);
+                        }
+                    } else { cleanRows = rows; }
+
+                    cleanRows.forEach(row => {
+                        let date = getVal(row, ['日期','Date']);
+                        let title = getVal(row, ['行程名稱','行程','Title']);
+                        if(!date || !title) return;
+                        
+                        let paxStr = getVal(row, ['參與者','成員','Pax']);
+                        let pax = paxStr ? paxStr.split(/[,、，]/).map(m=>m.trim().replace(/仁傑/g, '傑')).filter(m=>m) : [];
+
+                        let newId = 'mig_' + Date.now() + '_' + order;
+                        updates[newId] = {
+                            date: date.split(' ')[0], // 移除星期
+                            title: title,
+                            period: getVal(row, ['時段','Period']),
+                            startTime: getVal(row, ['開始時間','Start']),
+                            endTime: getVal(row, ['結束時間','End']),
+                            tag: getVal(row, ['tag','Tag']),
+                            notes: getVal(row, ['行程細項與筆記','筆記']),
+                            traffic: getVal(row, ['交通路線','交通']),
+                            links: getVal(row, ['相關連結','連結']),
+                            mapUrl: getVal(row, ['google map','地圖']),
+                            pax: pax,
+                            order: order++
+                        };
+                    });
+
+                    // 上傳至 Firebase
+                    db.ref('itinerary').set(updates).then(() => {
+                        db.ref('system/migrated').set(true);
+                        listenToItinerary();
+                    });
                 }
-                html += `</div></div>`;
-                container.innerHTML += html;
             });
+        }
+        
+        function getVal(row, keys) {
+            if (!row || typeof row !== 'object') return '';
+            for (let k of keys) {
+                if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
+            }
+            for (let rk in row) {
+                if (!rk) continue;
+                let clean = String(rk).trim().replace(/^\ufeff/, '');
+                for (let k of keys) {
+                    if (clean.toLowerCase() === String(k).toLowerCase()) {
+                        if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== '') return String(row[rk]).trim();
+                    }
+                }
+            }
+            return '';
         }
 
         // ==========================================
-        // 購物 / 行李 共用邏輯
+        // 待辦 / 購物 / 行李 (個人專屬，LocalStorage 或 Firebase)
         // ==========================================
         function saveList(type) {
-            if (type === 'shop') { localStorage.setItem(SHOP_KEY, JSON.stringify(shoppingData)); renderShoppingList(); }
-            if (type === 'lug') { localStorage.setItem(LUG_KEY, JSON.stringify(luggageData)); renderLuggageList(); }
+            if (type === 'shop') { localStorage.setItem(`shop_${currentUserIdentity}`, JSON.stringify(shoppingData)); renderShoppingList(); }
+            if (type === 'lug') { localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData)); renderLuggageList(); }
         }
-
-        function shoppingAddCategory() { addCategory('shop', '請輸入購物分類 (例如：免稅藥妝、伴手禮)'); }
-        function luggageAddCategory() { addCategory('lug', '請輸入行李分類 (例如：隨身衣物、重要文件)'); }
 
         function addCategory(type, msg) {
             const name = prompt(msg);
@@ -1216,9 +973,7 @@
             document.getElementById('itemModal').style.display = 'flex';
         }
 
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        function saveItem() {
+        function saveListItem() {
             const type = document.getElementById('targetListType').value;
             const catId = document.getElementById('targetCategoryId').value;
             const name = document.getElementById('itemName').value.trim();
@@ -1229,11 +984,7 @@
             const data = type === 'shop' ? shoppingData : luggageData;
             const cat = data.find(c => c.id === catId);
             if (cat) {
-                cat.items.push({
-                    id: 'i_'+Date.now(), name: name, note: note,
-                    tags: type === 'shop' && tagsInp ? tagsInp.split(',').map(t=>t.trim()).filter(t=>t) : [],
-                    checked: false
-                });
+                cat.items.push({ id: 'i_'+Date.now(), name: name, note: note, tags: type === 'shop' && tagsInp ? tagsInp.split(',').map(t=>t.trim()).filter(t=>t) : [], checked: false });
                 saveList(type); closeModal('itemModal');
             }
         }
@@ -1252,78 +1003,52 @@
 
         function renderGenericList(data, containerId, type) {
             const container = document.getElementById(containerId); container.innerHTML = '';
-            if (data.length === 0) {
-                container.innerHTML = `<div style="text-align:center; padding:40px; color:#8187A1; font-weight:900;">目前無分類清單，點擊上方新增！</div>`; return;
-            }
+            if (data.length === 0) return;
             data.forEach(cat => {
                 let itemsHtml = cat.items.map(i => {
                     let tags = i.tags && i.tags.length ? `<div class="item-meta">${i.tags.map(t=>`<span class="item-tag">${t}</span>`).join('')}</div>` : '';
                     let note = i.note ? `<div class="item-note-text" style="margin-top:4px;">${i.note}</div>` : '';
-                    return `
-                    <div class="item-card">
+                    return `<div class="item-card">
                         <input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')">
-                        <div class="item-content">
-                            <div class="item-title ${i.checked?'done':''}">${i.name}</div>
-                            ${tags}${note}
-                        </div>
+                        <div class="item-content"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${tags}${note}</div>
                         <button class="del-btn" onclick="delItem('${type}','${cat.id}','${i.id}')">✕</button>
                     </div>`;
                 }).join('');
-                container.innerHTML += `
-                <div style="margin-bottom:24px;">
-                    <div class="category-header">
-                        <h3>${cat.name}</h3>
-                        <div>
-                            <button class="add-small-btn" onclick="openItemModal('${type}','${cat.id}')">+ 物品</button>
-                            <button class="del-btn" onclick="delCategory('${type}','${cat.id}')">🗑️</button>
-                        </div>
-                    </div>
-                    <div>${itemsHtml}</div>
-                </div>`;
+                container.innerHTML += `<div style="margin-bottom:24px;">
+                    <div class="category-header"><h3>${cat.name}</h3><div><button class="add-small-btn" onclick="openItemModal('${type}','${cat.id}')">+ 物品</button><button class="del-btn" onclick="delCategory('${type}','${cat.id}')">🗑️</button></div></div>
+                    <div>${itemsHtml}</div></div>`;
             });
         }
         function renderShoppingList() { renderGenericList(shoppingData, 'shopping-list-container', 'shop'); }
         function renderLuggageList() { renderGenericList(luggageData, 'luggage-container', 'lug'); }
 
-        // ==========================================
-        // 待辦事項邏輯
-        // ==========================================
+        // 待辦 (Firebase 雲端，但專屬個人)
         function openTodoModal() {
-            document.getElementById('todoTask').value = ''; document.getElementById('todoAssignee').value = '';
-            document.getElementById('todoDate').value = ''; document.getElementById('todoNote').value = '';
+            document.getElementById('todoTask').value = ''; document.getElementById('todoDate').value = ''; document.getElementById('todoNote').value = '';
             document.getElementById('todoModal').style.display = 'flex';
         }
         function saveTodo() {
             const task = document.getElementById('todoTask').value.trim();
-            const assign = document.getElementById('todoAssignee').value.trim();
-            const date = document.getElementById('todoDate').value;
-            const note = document.getElementById('todoNote').value.trim();
-            if(!task || !assign) { alert('事項與負責人必填！'); return; }
-            todoData.push({ id: 't_'+Date.now(), task, assign, date, note, checked: false });
-            localStorage.setItem(TODO_KEY, JSON.stringify(todoData));
-            renderTodoList(); closeModal('todoModal');
+            if(!task) { alert('事項必填！'); return; }
+            db.ref(`users/${currentUserIdentity}/todo`).push({
+                task: task, date: document.getElementById('todoDate').value, note: document.getElementById('todoNote').value.trim(), checked: false
+            });
+            closeModal('todoModal');
         }
         function toggleTodo(id) {
-            const t = todoData.find(x=>x.id===id); if(t) { t.checked = !t.checked; localStorage.setItem(TODO_KEY, JSON.stringify(todoData)); renderTodoList(); }
+            let t = todoData.find(x=>x.id===id);
+            if(t) db.ref(`users/${currentUserIdentity}/todo/${id}/checked`).set(!t.checked);
         }
-        function delTodo(id) {
-            todoData = todoData.filter(x=>x.id!==id); localStorage.setItem(TODO_KEY, JSON.stringify(todoData)); renderTodoList();
-        }
+        function delTodo(id) { db.ref(`users/${currentUserIdentity}/todo/${id}`).remove(); }
         function renderTodoList() {
             const container = document.getElementById('todo-container'); container.innerHTML = '';
-            if(todoData.length===0) { container.innerHTML = '<div style="text-align:center; padding:40px; color:#8187A1; font-weight:900;">目前無待辦事項！</div>'; return; }
+            if(todoData.length===0) return;
             todoData.forEach(t => {
-                let metaHtml = `<span class="badge-user">👤 ${t.assign}</span>`;
-                if(t.date) metaHtml += `<span class="badge-date">⏳ ${t.date}</span>`;
-                let noteHtml = t.note ? `<div class="item-note-text" style="margin-top:6px;">${t.note}</div>` : '';
-                container.innerHTML += `
-                <div class="item-card">
+                let d = t.date ? `<span class="badge-date">⏳ ${t.date}</span>` : '';
+                let n = t.note ? `<div class="item-note-text" style="margin-top:6px;">${t.note}</div>` : '';
+                container.innerHTML += `<div class="item-card">
                     <input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')">
-                    <div class="item-content">
-                        <div class="item-title ${t.checked?'done':''}">${t.task}</div>
-                        <div class="item-meta">${metaHtml}</div>
-                        ${noteHtml}
-                    </div>
+                    <div class="item-content"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div>
                     <button class="del-btn" onclick="delTodo('${t.id}')">✕</button>
                 </div>`;
             });
