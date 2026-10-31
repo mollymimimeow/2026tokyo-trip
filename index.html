@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>2026 東京體驗聖誕節</title>
     <!-- App 桌面圖示與全螢幕設定 -->
-    <link rel="apple-touch-icon" href="icon.png">
-    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%0A%20%20%22name%22%3A%20%22%E6%9D%B1%E4%BA%AC%E8%81%96%E8%AA%95%22%2C%0A%20%20%22short_name%22%3A%20%22%E6%9D%B1%E4%BA%AC%E8%81%96%E8%AA%95%22%2C%0A%20%20%22start_url%22%3A%20%22./index.html%22%2C%0A%20%20%22display%22%3A%20%22standalone%22%2C%0A%20%20%22background_color%22%3A%20%22%230A192F%22%2C%0A%20%20%22theme_color%22%3A%20%22%230A192F%22%2C%0A%20%20%22icons%22%3A%20%5B%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22src%22%3A%20%22icon.png%22%2C%0A%20%20%20%20%20%20%22sizes%22%3A%20%22192x192%22%2C%0A%20%20%20%20%20%20%22type%22%3A%20%22image/png%22%0A%20%20%20%20%7D%2C%0A%20%20%20%20%7B%0A%20%20%20%20%20%20%22src%22%3A%20%22icon.png%22%2C%0A%20%20%20%20%20%20%22sizes%22%3A%20%22512x512%22%2C%0A%20%20%20%20%20%20%22type%22%3A%20%22image/png%22%0A%20%20%20%20%7D%0A%20%20%5D%0A%7D">
+    <link rel="apple-touch-icon" href="icon.png?v=2">
+    <link rel="icon" type="image/png" href="icon.png?v=2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="東京聖誕">
+
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -499,7 +501,7 @@
             grid.innerHTML = ''; paxGrid.innerHTML = '';
             MEMBERS.forEach(m => {
                 let btn = document.createElement('button'); btn.className = 'identity-btn'; btn.innerText = m;
-                btn.onclick = () => { localStorage.setItem('tokyo_identity_26', m); currentUserIdentity = m; document.getElementById('identity-modal').style.display = 'none'; startApp(); };
+                btn.onclick = () => { localStorage.setItem('tokyo_identity_26', m); window.location.reload(); };
                 grid.appendChild(btn);
                 paxGrid.innerHTML += `<label class="tag-select-item"><input type="checkbox" name="iti-pax" value="${m}"> ${m}</label>`;
             });
@@ -541,22 +543,43 @@
                 ]}
             ];
 
-            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || [];
-            
-            let savedLug = localStorage.getItem(`lug_${currentUserIdentity}`);
-            if (savedLug) {
-                luggageData = JSON.parse(savedLug);
-            } else {
-                // 如果是第一次載入，給予預設東京行李範本
-                luggageData = JSON.parse(JSON.stringify(DEFAULT_LUGGAGE));
-                localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData));
-            }
-
+            // 待辦事項雲端連線
             db.ref(`users/${currentUserIdentity}/todo`).on('value', snap => {
                 todoData = []; if (snap.exists()) { let td = snap.val(); for(let key in td) { td[key].id = key; todoData.push(td[key]); } }
                 renderTodoList();
             });
-            renderShoppingList(); renderLuggageList();
+
+            // 購物清單雲端連線與資料轉移
+            let shopRef = db.ref(`users/${currentUserIdentity}/shopping`);
+            shopRef.once('value').then(snap => {
+                if (!snap.exists()) {
+                    let localShop = localStorage.getItem(`shop_${currentUserIdentity}`);
+                    let data = localShop ? JSON.parse(localShop) : [];
+                    if (data.length > 0) shopRef.set(data);
+                }
+                shopRef.on('value', snapshot => {
+                    shoppingData = snapshot.val() || [];
+                    if (!Array.isArray(shoppingData)) shoppingData = Object.values(shoppingData);
+                    shoppingData.forEach(c => { if (!c.items) c.items = []; else if (!Array.isArray(c.items)) c.items = Object.values(c.items); });
+                    renderShoppingList();
+                });
+            });
+
+            // 行李清單雲端連線與資料轉移
+            let lugRef = db.ref(`users/${currentUserIdentity}/luggage`);
+            lugRef.once('value').then(snap => {
+                if (!snap.exists()) {
+                    let localLug = localStorage.getItem(`lug_${currentUserIdentity}`);
+                    let data = localLug ? JSON.parse(localLug) : JSON.parse(JSON.stringify(DEFAULT_LUGGAGE));
+                    lugRef.set(data);
+                }
+                lugRef.on('value', snapshot => {
+                    luggageData = snapshot.val() || [];
+                    if (!Array.isArray(luggageData)) luggageData = Object.values(luggageData);
+                    luggageData.forEach(c => { if (!c.items) c.items = []; else if (!Array.isArray(c.items)) c.items = Object.values(c.items); });
+                    renderLuggageList();
+                });
+            });
 
             db.ref('system/migrated').once('value').then(snap => {
                 if (!snap.exists()) performMigrationFromCSV(); else listenToItinerary();
@@ -1277,8 +1300,14 @@
         }
 
         function saveList(type) {
-            if (type === 'shop') { localStorage.setItem(`shop_${currentUserIdentity}`, JSON.stringify(shoppingData)); renderShoppingList(); }
-            if (type === 'lug') { localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData)); renderLuggageList(); }
+            if (type === 'shop') { 
+                db.ref(`users/${currentUserIdentity}/shopping`).set(shoppingData);
+                localStorage.setItem(`shop_${currentUserIdentity}`, JSON.stringify(shoppingData)); 
+            }
+            if (type === 'lug') { 
+                db.ref(`users/${currentUserIdentity}/luggage`).set(luggageData);
+                localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData)); 
+            }
         }
         function addCategory(type, msg) {
             const name = prompt(msg);
