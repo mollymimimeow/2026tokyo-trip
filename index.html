@@ -15,220 +15,95 @@
 
     <style>
         :root {
-            /* 聖誕夜主題色彩 */
-            --bg-color: #0A192F; /* 深邃星空夜 */
-            --primary-color: #D32F2F; /* 聖誕紅 */
-            --secondary-color: #388E3C; /* 聖誕綠 */
-            --accent-gold: #FDD835; /* 燈飾星光金 */
-            
-            --text-main: #E2E8F0; /* 夜間模式的主要白字 */
-            --text-light: #94A3B8; /* 次要灰字 */
-            
-            --card-bg: rgba(255, 255, 255, 0.05); /* 半透明玻璃卡片 */
+            --bg-color: #0A192F; 
+            --primary-color: #D32F2F; 
+            --secondary-color: #388E3C; 
+            --accent-gold: #FDD835; 
+            --text-main: #E2E8F0; 
+            --text-light: #94A3B8; 
+            --card-bg: rgba(255, 255, 255, 0.05); 
             --card-border: rgba(255, 255, 255, 0.1);
-            
             --border-radius: 16px;
             --safe-bottom: env(safe-area-inset-bottom, 20px);
         }
 
-        * {
-            box-sizing: border-box; margin: 0; padding: 0;
-            font-family: 'Noto Sans TC', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: calc(90px + var(--safe-bottom)); overflow-x: hidden; }
+        .app-container { max-width: 600px; margin: 0 auto; min-height: 100vh; background-color: transparent; position: relative; }
 
-        body {
-            background-color: var(--bg-color); color: var(--text-main);
-            padding-bottom: calc(90px + var(--safe-bottom)); 
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            max-width: 600px; margin: 0 auto; min-height: 100vh;
-            background-color: transparent; position: relative;
-        }
-
-        /* 飄雪與星星背景動畫 */
-        .snow-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 0; overflow: hidden;
-            background: radial-gradient(circle at 50% 0%, #1a2a6c, #112 70%);
-        }
+        .snow-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; background: radial-gradient(circle at 50% 0%, #1a2a6c, #112 70%); }
+        .snow { position: absolute; top: -10%; color: white; font-size: 1em; text-shadow: 0 0 5px rgba(255,255,255,0.8); animation: fall linear infinite; opacity: 0; }
+        @keyframes fall { 0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.5; } 100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; } }
         
-        .snow {
-            position: absolute; top: -10%;
-            color: white; font-size: 1em; text-shadow: 0 0 5px rgba(255,255,255,0.8);
-            animation: fall linear infinite; opacity: 0;
-        }
-        @keyframes fall {
-            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0; }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.5; }
-            100% { transform: translateY(110vh) rotate(360deg) scale(1.2); opacity: 0; }
-        }
-        
-        /* 頂部 Header - 聖誕風格 */
-        .header {
-            background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.95));
-            color: white; padding: 55px 20px 30px;
-            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
-            text-align: center; position: relative; overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 2;
-            border-bottom: 2px solid var(--accent-gold);
-        }
-        
-        /* 懸掛燈飾裝飾 */
-        .header::before {
-            content: '✨ 🎄 🎁 🔔 ❄️';
-            position: absolute; top: 15px; left: 0; right: 0;
-            font-size: 16px; letter-spacing: 20px; opacity: 0.6;
-            animation: twinkle 3s infinite alternate;
-        }
+        .header { background: linear-gradient(135deg, rgba(211, 47, 47, 0.9), rgba(183, 28, 28, 0.95)); color: white; padding: 55px 20px 30px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.5); z-index: 2; border-bottom: 2px solid var(--accent-gold); }
+        .header::before { content: '✨ 🎄 🎁 🔔 ❄️'; position: absolute; top: 15px; left: 0; right: 0; font-size: 16px; letter-spacing: 20px; opacity: 0.6; animation: twinkle 3s infinite alternate; }
         @keyframes twinkle { 0% { opacity: 0.4; } 100% { opacity: 0.9; text-shadow: 0 0 10px var(--accent-gold); } }
-
-        .header h1 {
-            font-size: 28px; font-weight: 900; margin-bottom: 8px;
-            letter-spacing: 1px; position: relative; z-index: 2;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(253, 216, 53, 0.4);
-            color: #FFF;
-        }
+        .header h1 { font-size: 28px; font-weight: 900; margin-bottom: 8px; letter-spacing: 1px; position: relative; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 15px rgba(253, 216, 53, 0.4); }
         .header p { font-size: 13px; opacity: 0.9; position: relative; z-index: 2; color: #FFCDD2; font-weight: 700; }
-        
-        .user-badge {
-            position: absolute; top: 16px; right: 20px; z-index: 10;
-            background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: 900; cursor: pointer; backdrop-filter: blur(4px);
-            border: 1px solid rgba(255,255,255,0.2); color: white;
-        }
+        .user-badge { position: absolute; top: 16px; right: 20px; z-index: 10; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 900; cursor: pointer; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); color: white; }
 
         .view-section { display: none; animation: fadeIn 0.3s ease; position: relative; z-index: 1; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 過濾器 & 頁籤 */
         .filter-container { display: flex; overflow-x: auto; gap: 10px; padding: 16px 20px 8px; scrollbar-width: none; }
         .filter-container::-webkit-scrollbar { display: none; }
-        .filter-btn {
-            background-color: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--card-border);
-            padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 700;
-            white-space: nowrap; cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(4px);
-        }
-        .filter-btn.active {
-            background-color: var(--primary-color); color: white; border-color: var(--accent-gold);
-            box-shadow: 0 0 15px rgba(211, 47, 47, 0.4);
-        }
+        .filter-btn { background-color: rgba(255,255,255,0.1); color: var(--text-light); border: 1px solid var(--card-border); padding: 8px 18px; border-radius: 20px; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(4px); }
+        .filter-btn.active { background-color: var(--primary-color); color: white; border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(211, 47, 47, 0.4); }
 
         .date-tabs { display: flex; overflow-x: auto; gap: 12px; padding: 12px 20px 20px; scrollbar-width: none; }
         .date-tabs::-webkit-scrollbar { display: none; }
-        .date-tab {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-width: 65px; height: 75px; background-color: rgba(255,255,255,0.05); border-radius: 16px;
-            color: var(--text-light); cursor: pointer; transition: all 0.2s ease;
-            border: 1px solid var(--card-border); backdrop-filter: blur(4px);
-        }
+        .date-tab { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 65px; height: 75px; background-color: rgba(255,255,255,0.05); border-radius: 16px; color: var(--text-light); cursor: pointer; transition: all 0.2s ease; border: 1px solid var(--card-border); backdrop-filter: blur(4px); }
         .date-tab span.day { font-size: 12px; margin-bottom: 4px; font-weight: 500; }
         .date-tab span.date { font-size: 20px; font-weight: 900; }
-        .date-tab.active { 
-            background-color: var(--secondary-color); color: white; border-color: var(--accent-gold); 
-            transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 142, 60, 0.4);
-        }
+        .date-tab.active { background-color: var(--secondary-color); color: white; border-color: var(--accent-gold); transform: scale(1.05); box-shadow: 0 0 15px rgba(56, 142, 60, 0.4); }
 
         .itinerary-container { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 16px; }
         
-        /* 卡片共用結構 - 夜間發光玻璃風格 */
-        .card {
-            border-radius: 20px; padding: 18px 18px 18px 36px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3); position: relative; 
-            overflow: hidden; margin-bottom: 4px;
-            background: var(--card-bg); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-top: 1px solid rgba(255,255,255,0.2);
-        }
-        .card-content { position: relative; z-index: 2; }
-        .card-watermark {
-            position: absolute; right: -5px; bottom: -15px; font-size: 100px; 
-            opacity: 0.15; z-index: 1; pointer-events: none; transform: rotate(-15deg);
-            filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
-        }
-
-        .drag-handle {
-            position: absolute; left: 0; top: 0; bottom: 0; width: 32px;
-            background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
-            cursor: grab; color: #64748B; font-size: 18px; border-right: 1px solid rgba(255,255,255,0.05);
-        }
-        .drag-handle:active { cursor: grabbing; background: rgba(255,255,255,0.1); }
+        .card { border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); position: relative; margin-bottom: 4px; display: flex; background: var(--card-bg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-top: 1px solid rgba(255,255,255,0.2); }
+        .drag-handle { width: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.03); cursor: grab; color: #64748B; font-size: 20px; border-right: 1px solid rgba(255,255,255,0.05); touch-action: none; }
+        .drag-handle:active { cursor: grabbing; background: rgba(255,255,255,0.08); }
+        
+        .card-inner { flex-grow: 1; padding: 18px; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         .card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10; }
-        .icon-btn {
-            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px;
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-            font-size: 14px; cursor: pointer; color: white; backdrop-filter: blur(4px);
-        }
+        .icon-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; color: white; backdrop-filter: blur(4px); }
+        .card-watermark { position: absolute; right: -5px; bottom: -15px; font-size: 100px; opacity: 0.15; z-index: 0; pointer-events: none; transform: rotate(-15deg); filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
 
-        /* 主題色彩 - 夜間發光版 */
         .theme-food { border-left: 6px solid #FF9800 !important; }
         .theme-food .time-badge { background: rgba(255, 152, 0, 0.2); color: #FFB74D; border: 1px solid rgba(255, 152, 0, 0.3);}
-        
         .theme-attraction { border-left: 6px solid #4CAF50 !important; }
         .theme-attraction .time-badge { background: rgba(76, 175, 80, 0.2); color: #81C784; border: 1px solid rgba(76, 175, 80, 0.3);}
-        
         .theme-transport { border-left: 6px solid #29B6F6 !important; }
         .theme-transport .time-badge { background: rgba(41, 182, 246, 0.2); color: #81D4FA; border: 1px solid rgba(41, 182, 246, 0.3);}
-        
         .theme-hotel { border-left: 6px solid #BA68C8 !important; }
         .theme-hotel .time-badge { background: rgba(186, 104, 200, 0.2); color: #CE93D8; border: 1px solid rgba(186, 104, 200, 0.3);}
-        
         .theme-shop { border-left: 6px solid #F06292 !important; }
         .theme-shop .time-badge { background: rgba(240, 98, 146, 0.2); color: #F48FB1; border: 1px solid rgba(240, 98, 146, 0.3);}
-        
         .theme-default { border-left: 6px solid var(--primary-color) !important; }
         .theme-default .time-badge { background: rgba(211, 47, 47, 0.2); color: #EF5350; border: 1px solid rgba(211, 47, 47, 0.3);}
 
-        .time-badge { font-size: 13px; padding: 5px 12px; border-radius: 12px; display: inline-block; font-weight: 900; margin-bottom: 10px; }
-        .card-title { font-size: 19px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: white; padding-right: 60px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
-        
-        .card-note { background: rgba(0,0,0,0.3); border-left: 3px solid rgba(255,255,255,0.2); padding: 10px 14px; border-radius: 6px 12px 12px 6px; font-size: 13.5px; color: #CBD0E1; line-height: 1.5; margin-bottom: 12px; }
-        .tag-pill { font-size: 12px; color: #FFF; background: rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-bottom: 12px; margin-right: 4px; font-weight: 700; border: 1px solid rgba(255,255,255,0.1);}
-        
-        .map-btn { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 900; margin-top: 8px; border: 1px solid rgba(255,255,255,0.2); }
+        .time-badge { font-size: 13px; padding: 5px 12px; border-radius: 12px; display: inline-block; font-weight: 900; margin-bottom: 10px; align-self: flex-start;}
+        .card-title { font-size: 19px; font-weight: 900; margin-bottom: 8px; line-height: 1.4; color: white; padding-right: 60px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 1;}
+        .card-note { background: rgba(0,0,0,0.3); padding: 12px 14px; border-radius: 12px; font-size: 13.5px; color: #CBD0E1; line-height: 1.5; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); z-index: 1;}
+        .tag-pill { font-size: 12px; color: #FFF; background: rgba(255,255,255,0.15); padding: 5px 10px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
+        .map-btn { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); color: white; text-decoration: none; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 900; margin-top: 4px; border: 1px solid rgba(255,255,255,0.2); z-index: 1;}
         .map-btn svg { width: 18px; height: 18px; margin-right: 8px; fill: var(--accent-gold); filter: drop-shadow(0 0 2px var(--accent-gold));}
 
-        /* FAB 新增按鈕 - 聖誕禮物盒風格 */
-        .fab {
-            position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px;
-            background: var(--primary-color); color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 28px;
-            box-shadow: 0 4px 15px rgba(211, 47, 47, 0.6), 0 0 0 2px var(--accent-gold); cursor: pointer; z-index: 90; transition: transform 0.2s;
-        }
+        .fab { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 15px rgba(211, 47, 47, 0.6), 0 0 0 2px var(--accent-gold); cursor: pointer; z-index: 90; transition: transform 0.2s; }
         .fab::after { content: '🎁'; position: absolute; font-size: 28px; }
         .fab:active { transform: scale(0.9) rotate(10deg); }
 
-        /* 模態框 (共用) */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: flex-end;
-            z-index: 100; backdrop-filter: blur(5px); padding-top: 50px;
-        }
-        .modal-box { 
-            background: #1E293B; padding: 24px; border-top-left-radius: 24px; border-top-right-radius: 24px; 
-            width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
-            border-top: 1px solid rgba(255,255,255,0.1); color: white;
-            animation: slideUp 0.3s ease;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: flex-end; z-index: 100; backdrop-filter: blur(5px); padding-top: 50px; }
+        .modal-box { background: #1E293B; padding: 24px; border-top-left-radius: 24px; border-top-right-radius: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.1); color: white; animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
         .modal-box h3 { margin-bottom: 18px; font-weight: 900; color: white; font-size: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
         .input-group { margin-bottom: 14px; }
         .input-group label { display: block; font-size: 13px; font-weight: 900; color: #94A3B8; margin-bottom: 6px; }
-        .input-group input, .input-group textarea, .input-group select { 
-            width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 14px; 
-            background: rgba(0,0,0,0.3); color: white; font-family: inherit;
-        }
+        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; font-size: 14px; background: rgba(0,0,0,0.3); color: white; font-family: inherit; }
         .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: 2px solid var(--accent-gold); }
-        
         .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; border:1px solid rgba(255,255,255,0.1);}
-        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary-color); }
-
+        .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;}
+        .checkbox-item input { width: 18px; height: 18px; accent-color: var(--primary-color); cursor:pointer;}
         .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; position: sticky; bottom: 0; background: #1E293B; padding-top: 15px; padding-bottom: 10px; border-top: 1px solid rgba(255,255,255,0.1);}
         .btn-cancel { padding: 12px 20px; border: none; background: rgba(255,255,255,0.1); border-radius: 10px; color: white; font-weight: 900; cursor: pointer; flex: 1;}
         .btn-save { padding: 12px 20px; border: none; background: var(--primary-color); border-radius: 10px; color: white; font-weight: 900; cursor: pointer; flex: 2; box-shadow: 0 4px 10px rgba(211,47,47,0.4);}
@@ -237,18 +112,8 @@
         .identity-btn { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 16px; font-size: 18px; font-weight: 900; color: white; cursor: pointer; transition: 0.2s;}
         .identity-btn:active { background: var(--primary-color); border-color: var(--accent-gold); transform: scale(0.95);}
 
-        /* 底部導覽列 - 帶有雪地感 */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px;
-            background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around;
-            padding: 12px 10px var(--safe-bottom); z-index: 50; border-top-left-radius: 24px; border-top-right-radius: 24px;
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; color: #64748B;
-            font-size: 11px; font-weight: 900; gap: 6px; cursor: pointer; transition: 0.3s; flex: 1; padding: 6px 0;
-            text-align: center;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background-color: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-around; padding: 12px 10px var(--safe-bottom); z-index: 50; border-top-left-radius: 24px; border-top-right-radius: 24px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #64748B; font-size: 11px; font-weight: 900; gap: 6px; cursor: pointer; transition: 0.3s; flex: 1; padding: 6px 0; text-align: center; }
         .nav-item.active { color: var(--accent-gold); text-shadow: 0 0 10px rgba(253, 216, 53, 0.5); }
         .nav-icon { font-size: 22px; transition: transform 0.2s; filter: grayscale(100%) opacity(0.5);}
         .nav-item.active .nav-icon { transform: translateY(-3px) scale(1.1); filter: grayscale(0%) opacity(1);}
@@ -258,47 +123,27 @@
         .list-tab-btn.active { background: var(--secondary-color); color: white; border-color: var(--accent-gold);}
         .sub-view { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .sub-view.active { display: block; }
-        
         #loading { text-align: center; padding: 40px; color: white; font-weight: 700; line-height: 1.6;}
-        
-        /* 私人清單區塊裝飾 */
-        .private-banner {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: #E2E8F0; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        
-        /* 隱藏 Netlify 徽章 */
+        .private-banner { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #E2E8F0; padding:12px; border-radius:12px; font-size:13px; font-weight:900; margin-bottom:16px; display: flex; align-items: center; gap: 8px; }
         [data-netlify-deploy-id], #netlify-drawer, .netlify-badge { display: none !important; }
         
-        /* 航班票根夜間模式 */
-        .ticket {
-            background: rgba(255,255,255,0.05); border-radius: 16px; position: relative;
-            border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 16px;
-        }
-        .ticket-header { background: rgba(0,0,0,0.5); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2);}
-        .ticket-body { padding: 20px; position: relative; }
-        .ticket-route { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;}
-        .ticket-route::after { content: ''; position: absolute; left: 60px; right: 60px; top: 22px; border-top: 2px dashed rgba(255,255,255,0.2); z-index: 0; }
+        /* 機票樣式 */
+        .flight-card { background: rgba(255,255,255,0.05); border-radius: 16px; position: relative; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.3); backdrop-filter: blur(10px); }
+        .flight-card-header { background: rgba(0,0,0,0.5); color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.2);}
+        .flight-card-body { padding: 20px; position: relative; }
+        .flight-route { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative;}
+        .flight-route::after { content: ''; position: absolute; left: 60px; right: 60px; top: 22px; border-top: 2px dashed rgba(255,255,255,0.2); z-index: 0; }
         .plane-icon { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); background: #1E293B; padding: 0 10px; z-index: 1; font-size: 18px;}
-        .port { text-align: center; z-index: 1; background: #1E293B; padding: 0 5px;}
-        .port h2 { font-size: 32px; font-weight: 900; color: var(--accent-gold); margin-bottom: 2px; line-height: 1;}
-        .port p { font-size: 12px; color: var(--text-light); font-weight: 900;}
-        .ticket-info { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 12px;}
-        .info-col { display: flex; flex-direction: column; flex: 1;}
-        .info-col label { font-size: 11px; color: var(--text-light); margin-bottom: 2px; font-weight: 700;}
-        .info-col span { font-size: 15px; font-weight: 900; color: white; }
+        .flight-port { text-align: center; z-index: 1; background: #1E293B; padding: 0 5px;}
+        .flight-port h2 { font-size: 32px; font-weight: 900; color: var(--accent-gold); margin-bottom: 2px; line-height: 1;}
+        .flight-port p { font-size: 12px; color: var(--text-light); font-weight: 900;}
+        .flight-info-row { display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 12px; margin-bottom: 12px;}
+        .flight-info-col { display: flex; flex-direction: column; flex: 1;}
+        .flight-info-col label { font-size: 11px; color: var(--text-light); margin-bottom: 2px; font-weight: 700;}
+        .flight-info-col span { font-size: 15px; font-weight: 900; color: white; }
         
-        .add-btn-large {
-            width: 100%; padding: 14px; background: var(--secondary-color); color: white;
-            border: 1px solid var(--accent-gold); border-radius: 12px; font-size: 15px; font-weight: 900; margin-bottom: 20px;
-            cursor: pointer; box-shadow: 0 4px 10px rgba(56, 142, 60, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px;
-        }
-        
-        .item-card {
-            background: rgba(255,255,255,0.05); border-radius: 14px; padding: 16px; margin-bottom: 12px;
-            border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: flex-start; gap: 12px;
-        }
+        .add-btn-large { width: 100%; padding: 14px; background: var(--secondary-color); color: white; border: 1px solid var(--accent-gold); border-radius: 12px; font-size: 15px; font-weight: 900; margin-bottom: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(56, 142, 60, 0.3); display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .item-card { background: rgba(255,255,255,0.05); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: flex-start; gap: 12px; }
         .item-checkbox { margin-top: 4px; width: 22px; height: 22px; accent-color: var(--secondary-color); flex-shrink: 0; }
         .item-title { font-size: 16px; font-weight: 700; color: white; margin-bottom: 6px; }
         .item-title.done { text-decoration: line-through; color: #64748B; }
@@ -307,9 +152,7 @@
 </head>
 <body>
 
-    <div class="snow-container" id="snow-container">
-        <!-- JS 生成雪花 -->
-    </div>
+    <div class="snow-container" id="snow-container"></div>
 
     <div class="app-container">
         <div class="header">
@@ -324,7 +167,6 @@
             <div class="date-tabs" id="date-tabs"></div>
             <div id="loading">✨ 聖誕魔法連線中...</div>
             <div class="itinerary-container" id="itinerary-container"></div>
-            
             <div id="fab-add" class="fab" onclick="openItineraryModal()"></div>
         </div>
 
@@ -334,12 +176,10 @@
                 <button class="list-tab-btn active" onclick="switchSubView('view-flights', 'flights-list', this)">✈️ 航班資訊</button>
                 <button class="list-tab-btn" onclick="switchSubView('view-flights', 'hotels-list', this)">🏨 飯店資訊</button>
             </div>
-            
             <div id="sub-flights-list" class="sub-view active" style="padding-top:0;">
                 <div class="filter-container" id="flight-filter-container" style="padding: 16px 20px 8px;"></div>
                 <div class="flights-container" id="flights-ticket-container" style="padding-top: 10px;"></div>
             </div>
-            
             <div id="sub-hotels-list" class="sub-view">
                 <div class="flights-container" id="hotel-info-container"></div>
             </div>
@@ -348,9 +188,7 @@
         <!-- ================= 購買清單 ================= -->
         <div id="view-shopping" class="view-section">
             <div style="padding:20px;">
-                <div class="private-banner">
-                    🎁 這是你的私人聖誕購物願望清單
-                </div>
+                <div class="private-banner">🎁 這是你的私人聖誕購物願望清單</div>
                 <button class="add-btn-large" onclick="addCategory('shop', '輸入分類名稱')">➕ 新增購物分類</button>
                 <div id="shopping-list-container"></div>
             </div>
@@ -363,35 +201,22 @@
                 <button class="list-tab-btn" onclick="switchSubView('view-todo', 'luggage', this)">🧳 行李清單</button>
             </div>
             <div id="sub-todo" class="sub-view active">
-                <div class="private-banner">
-                    📝 這是你的私人待辦事項（已加密儲存於雪地雲端）
-                </div>
+                <div class="private-banner">📝 這是你的私人待辦事項（已加密儲存於雪地雲端）</div>
                 <button class="add-btn-large" onclick="openTodoModal()">➕ 新增待辦事項</button>
                 <div id="todo-container"></div>
             </div>
             <div id="sub-luggage" class="sub-view">
-                <div class="private-banner">
-                    🧳 這是你的私人行李清單
-                </div>
+                <div class="private-banner">🧳 這是你的私人行李清單</div>
                 <button class="add-btn-large" onclick="addCategory('lug', '輸入行李分類')">➕ 新增行李分類</button>
                 <div id="luggage-container"></div>
             </div>
         </div>
 
-        <!-- 底部導覽列 -->
         <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchView('itinerary', this)">
-                <span class="nav-icon">🎄</span><span>聖誕行程</span>
-            </div>
-            <div class="nav-item" onclick="switchView('flights', this)">
-                <span class="nav-icon">🦌</span><span>航班/住宿</span>
-            </div>
-            <div class="nav-item" onclick="switchView('todo', this)">
-                <span class="nav-icon">🧦</span><span>待辦/行李</span>
-            </div>
-            <div class="nav-item" onclick="switchView('shopping', this)">
-                <span class="nav-icon">🎁</span><span>聖誕禮物</span>
-            </div>
+            <div class="nav-item active" onclick="switchView('itinerary', this)"><span class="nav-icon">🎄</span><span>聖誕行程</span></div>
+            <div class="nav-item" onclick="switchView('flights', this)"><span class="nav-icon">🦌</span><span>航班/住宿</span></div>
+            <div class="nav-item" onclick="switchView('todo', this)"><span class="nav-icon">🧦</span><span>待辦/行李</span></div>
+            <div class="nav-item" onclick="switchView('shopping', this)"><span class="nav-icon">🎁</span><span>聖誕禮物</span></div>
         </div>
     </div>
 
@@ -405,100 +230,56 @@
         </div>
     </div>
 
-    <!-- 編輯/新增行程 Modal -->
     <div class="modal-overlay" id="itinerary-modal">
         <div class="modal-box">
             <h3 id="iti-modal-title">新增行程</h3>
             <input type="hidden" id="iti-id">
-            
-            <div class="input-group">
-                <label>行程名稱 (必填)</label>
-                <input type="text" id="iti-title" placeholder="例如：去六本木看聖誕燈飾">
-            </div>
+            <div class="input-group"><label>行程名稱 (必填)</label><input type="text" id="iti-title" placeholder="例如：去六本木看聖誕燈飾"></div>
             <div style="display:flex; gap:10px;">
-                <div class="input-group" style="flex:1;">
-                    <label>日期</label>
+                <div class="input-group" style="flex:1;"><label>日期</label>
                     <select id="iti-date">
-                        <option value="11/14">11/14 (六)</option>
-                        <option value="11/15">11/15 (日)</option>
-                        <option value="11/16">11/16 (一)</option>
-                        <option value="11/17">11/17 (二)</option>
-                        <option value="11/18">11/18 (三)</option>
-                        <option value="11/19">11/19 (四)</option>
-                        <option value="11/20">11/20 (五)</option>
-                        <option value="11/21">11/21 (六)</option>
-                        <option value="11/22">11/22 (日)</option>
+                        <option value="11/14">11/14 (六)</option><option value="11/15">11/15 (日)</option><option value="11/16">11/16 (一)</option>
+                        <option value="11/17">11/17 (二)</option><option value="11/18">11/18 (三)</option><option value="11/19">11/19 (四)</option>
+                        <option value="11/20">11/20 (五)</option><option value="11/21">11/21 (六)</option><option value="11/22">11/22 (日)</option>
                     </select>
                 </div>
-                <div class="input-group" style="flex:1;">
-                    <label>時段分類</label>
-                    <select id="iti-period">
-                        <option value="早餐">早餐</option>
-                        <option value="上午">上午</option>
-                        <option value="午餐">午餐</option>
-                        <option value="下午">下午</option>
-                        <option value="晚餐">晚餐</option>
-                        <option value="晚上">晚上</option>
-                    </select>
+                <div class="input-group" style="flex:1;"><label>時段分類</label>
+                    <select id="iti-period"><option value="早餐">早餐</option><option value="上午">上午</option><option value="午餐">午餐</option><option value="下午">下午</option><option value="晚餐">晚餐</option><option value="晚上">晚上</option></select>
                 </div>
             </div>
             <div style="display:flex; gap:10px;">
-                <div class="input-group" style="flex:1;">
-                    <label>開始時間</label>
-                    <input type="time" id="iti-start">
+                <div class="input-group" style="flex:1;"><label>開始時間</label><input type="time" id="iti-start"></div>
+                <div class="input-group" style="flex:1;"><label>結束時間</label><input type="time" id="iti-end"></div>
+            </div>
+            <div class="input-group">
+                <label>主題標籤 (可複選)</label>
+                <div class="checkbox-grid" id="iti-tag-grid">
+                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🛍️ 逛的"> 🛍️ 逛的</label>
+                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🍣 吃的"> 🍣 吃的</label>
+                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🧸 玩的"> 🧸 玩的</label>
+                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🗼 看的"> 🗼 看的</label>
+                    <label class="checkbox-item"><input type="checkbox" name="iti-tag" value="🚗 其他"> 🚗 其他</label>
                 </div>
-                <div class="input-group" style="flex:1;">
-                    <label>結束時間</label>
-                    <input type="time" id="iti-end">
-                </div>
             </div>
-            <div class="input-group">
-                <label>主題標籤 (例如：吃、景點、購物、交通)</label>
-                <input type="text" id="iti-tag" placeholder="影響卡片顏色設計">
-            </div>
-            <div class="input-group">
-                <label>參與成員 (可複選)</label>
-                <div class="checkbox-grid" id="iti-pax-grid"></div>
-            </div>
-            <div class="input-group">
-                <label>Google Map 連結</label>
-                <input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/...">
-            </div>
-            <div class="input-group">
-                <label>交通路線</label>
-                <textarea id="iti-traffic" rows="2" placeholder="搭乘地鐵..."></textarea>
-            </div>
-            <div class="input-group">
-                <label>行程筆記與細項</label>
-                <textarea id="iti-notes" rows="2" placeholder="記得帶..."></textarea>
-            </div>
-            <div class="input-group">
-                <label>相關連結</label>
-                <textarea id="iti-links" rows="2" placeholder="餐廳官網網址..."></textarea>
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button>
-                <button class="btn-save" onclick="saveItinerary()">送出願望</button>
-            </div>
+            <div class="input-group"><label>參與成員 (可複選)</label><div class="checkbox-grid" id="iti-pax-grid"></div></div>
+            <div class="input-group"><label>Google Map 連結</label><input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/..."></div>
+            <div class="input-group"><label>交通路線</label><textarea id="iti-traffic" rows="2" placeholder="搭乘地鐵..."></textarea></div>
+            <div class="input-group"><label>行程筆記與細項</label><textarea id="iti-notes" rows="2" placeholder="記得帶..."></textarea></div>
+            <div class="input-group"><label>相關連結</label><textarea id="iti-links" rows="2" placeholder="餐廳官網網址..."></textarea></div>
+            <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button><button class="btn-save" onclick="saveItinerary()">送出願望</button></div>
         </div>
     </div>
 
-    <!-- 待辦事項 Modal -->
     <div class="modal-overlay" id="todoModal">
         <div class="modal-box">
             <h3>新增待辦事項</h3>
             <div class="input-group"><label>待辦事項 (必填)</label><input type="text" id="todoTask"></div>
             <div class="input-group"><label>截止日期 (選填)</label><input type="date" id="todoDate"></div>
             <div class="input-group"><label>備註 (選填)</label><textarea id="todoNote" rows="2"></textarea></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('todoModal')">取消</button>
-                <button class="btn-save" onclick="saveTodo()">儲存</button>
-            </div>
+            <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('todoModal')">取消</button><button class="btn-save" onclick="saveTodo()">儲存</button></div>
         </div>
     </div>
 
-    <!-- 個人清單共用 Modal -->
     <div class="modal-overlay" id="itemModal">
         <div class="modal-box">
             <h3 id="itemModalTitle">新增物品</h3>
@@ -506,79 +287,47 @@
             <input type="hidden" id="targetCategoryId">
             <div class="input-group"><label>物品名稱 (必填)</label><input type="text" id="itemName"></div>
             <div class="input-group"><label>備註 (選填)</label><input type="text" id="itemNote"></div>
-            <div class="input-group" id="tagsInputGroup"><label>自定義標籤 (用逗號分隔)</label><input type="text" id="itemTags"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal('itemModal')">取消</button>
-                <button class="btn-save" onclick="saveListItem()">儲存</button>
-            </div>
+            <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itemModal')">取消</button><button class="btn-save" onclick="saveListItem()">儲存</button></div>
         </div>
     </div>
 
     <script>
-        // 生成聖誕雪花背景
         const snowContainer = document.getElementById('snow-container');
         const emojis = ['❄️', '⭐', '✨'];
         for (let i = 0; i < 30; i++) {
             let s = document.createElement('div');
-            s.className = 'snow';
-            s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            s.className = 'snow'; s.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             s.style.left = Math.random() * 100 + 'vw';
-            s.style.animationDuration = (Math.random() * 5 + 5) + 's';
-            s.style.animationDelay = (Math.random() * 5) + 's';
-            s.style.fontSize = (Math.random() * 10 + 10) + 'px';
-            snowContainer.appendChild(s);
+            s.style.animationDuration = (Math.random() * 5 + 5) + 's'; s.style.animationDelay = (Math.random() * 5) + 's';
+            s.style.fontSize = (Math.random() * 10 + 10) + 'px'; snowContainer.appendChild(s);
         }
 
         const firebaseConfig = {
-            apiKey: "AIzaSyA_GX-N_akogc9Xx9fZmmahVdp057AJ_CY",
-            authDomain: "tokyo-2026-4e56d.firebaseapp.com",
-            databaseURL: "https://tokyo-2026-4e56d-default-rtdb.firebaseio.com",
-            projectId: "tokyo-2026-4e56d",
-            storageBucket: "tokyo-2026-4e56d.firebasestorage.app",
-            messagingSenderId: "406716874155",
-            appId: "1:406716874155:web:40d841d3c16dd5c65ea6ee"
+            apiKey: "AIzaSyA_GX-N_akogc9Xx9fZmmahVdp057AJ_CY", authDomain: "tokyo-2026-4e56d.firebaseapp.com", databaseURL: "https://tokyo-2026-4e56d-default-rtdb.firebaseio.com",
+            projectId: "tokyo-2026-4e56d", storageBucket: "tokyo-2026-4e56d.firebasestorage.app", messagingSenderId: "406716874155", appId: "1:406716874155:web:40d841d3c16dd5c65ea6ee"
         };
-
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=2029826991&single=true&output=csv"; 
         const HOTEL_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=1489130274&single=true&output=csv";
         const FLIGHT_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRu0Is_3c6_sHerlzmVaa9qGCvwwF2cM8y7YtK9i0RvKaKevcHoMlJ62fWajYBlzql34aUBv2kERz85/pub?gid=1349483223&single=true&output=csv";
-
-        // 加入 ㄐㄓ
         const MEMBERS = ['雅', '瑜廷', '潘', '千', '唷', '超', '傑', '尚軒', '阿文', '鈺峰', 'ㄐㄓ'];
 
-        let db;
-        let currentUserIdentity = null;
-        let globalItinerary = {}; 
-        let currentFilter = 'all'; 
-        let currentDate = '11/14';
-        let sortableInstance = null;
-        
-        let shoppingData = [];
-        let luggageData = [];
-        let todoData = [];
-        let hotelDataCache = [];
-        let flightDataCache = [];
+        let db; let currentUserIdentity = null; let globalItinerary = {}; let currentFilter = 'all'; let currentDate = '11/14'; let sortableInstance = null;
+        let shoppingData = []; let luggageData = []; let todoData = []; let hotelDataCache = []; let parsedFlights = [];
+        let flightCombinedData = []; // 為了合併去回程而新增的結構
 
         const CHECKOUT_SCHEDULE = [
-            { date: '11/17', time: '11:00', name: '相鐵 FRESA INN' },
-            { date: '11/18', time: '10:00', name: '富士暁月湖凪Konagi' },
-            { date: '11/19', time: '11:00', name: '湯本富士屋酒店' },
-            { date: '11/22', time: '10:00', name: '押上 Airbnb' }
+            { date: '11/17', time: '11:00', name: '相鐵 FRESA INN' }, { date: '11/18', time: '10:00', name: '富士暁月湖凪Konagi' },
+            { date: '11/19', time: '11:00', name: '湯本富士屋酒店' }, { date: '11/22', time: '10:00', name: '押上 Airbnb' }
         ];
-
         const OVERNIGHT_SCHEDULE = {
-            '11/14': '相鐵 FRESA INN', '11/15': '相鐵 FRESA INN', '11/16': '相鐵 FRESA INN',
-            '11/17': '富士暁月湖凪Konagi', '11/18': '湯本富士屋酒店',
-            '11/19': '押上 Airbnb', '11/20': '押上 Airbnb', '11/21': '押上 Airbnb'
+            '11/14': '相鐵 FRESA INN', '11/15': '相鐵 FRESA INN', '11/16': '相鐵 FRESA INN', '11/17': '富士暁月湖凪Konagi',
+            '11/18': '湯本富士屋酒店', '11/19': '押上 Airbnb', '11/20': '押上 Airbnb', '11/21': '押上 Airbnb'
         };
-
         const MEMBER_STAY_RANGE = {
-            '雅': { start: '11/14', end: '11/22' }, '瑜廷': { start: '11/14', end: '11/22' },
-            '潘': { start: '11/14', end: '11/22' }, '千': { start: '11/14', end: '11/19' },
-            '唷': { start: '11/14', end: '11/22' }, '超': { start: '11/14', end: '11/22' },
-            '傑': { start: '11/14', end: '11/22' }, '尚軒': { start: '11/15', end: '11/19' },
-            '阿文': { start: '11/19', end: '11/22' }, '鈺峰': { start: '11/19', end: '11/22' },
-            'ㄐㄓ': { start: '11/14', end: '11/22' } 
+            '雅': { start: '11/14', end: '11/22' }, '瑜廷': { start: '11/14', end: '11/22' }, '潘': { start: '11/14', end: '11/22' },
+            '千': { start: '11/14', end: '11/19' }, '唷': { start: '11/14', end: '11/22' }, '超': { start: '11/14', end: '11/22' },
+            '傑': { start: '11/14', end: '11/22' }, '尚軒': { start: '11/15', end: '11/19' }, '阿文': { start: '11/19', end: '11/22' },
+            '鈺峰': { start: '11/19', end: '11/22' }, 'ㄐㄓ': { start: '11/14', end: '11/18' } 
         };
 
         function normalizeName(name) { return name.replace(/仁傑/g, '傑'); }
@@ -586,21 +335,19 @@
         window.onload = () => {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
-            renderMemberSelectors();
             
-            // 載入靜態航班飯店
             Promise.all([
                 new Promise((res) => Papa.parse(HOTEL_CSV_URL + '&t=' + Date.now(), { download: true, header: true, complete: res })),
                 new Promise((res) => Papa.parse(FLIGHT_CSV_URL + '&t=' + Date.now(), { download: true, header: true, complete: res }))
             ]).then(results => {
                 hotelDataCache = results[0].data;
                 parseFlightsData(results[1].data);
-                renderFlightsTab();
                 renderHotels();
             });
 
             currentUserIdentity = localStorage.getItem('tokyo_identity_26');
             if (!currentUserIdentity) {
+                renderMemberSelectors();
                 document.getElementById('identity-modal').style.display = 'flex';
                 document.getElementById('loading').style.display = 'none';
             } else {
@@ -609,82 +356,74 @@
         };
 
         function renderMemberSelectors() {
-            const grid = document.getElementById('identity-grid');
-            const paxGrid = document.getElementById('iti-pax-grid');
+            const grid = document.getElementById('identity-grid'); const paxGrid = document.getElementById('iti-pax-grid');
             grid.innerHTML = ''; paxGrid.innerHTML = '';
-            
             MEMBERS.forEach(m => {
-                let btn = document.createElement('button');
-                btn.className = 'identity-btn'; btn.innerText = m;
-                btn.onclick = () => {
-                    localStorage.setItem('tokyo_identity_26', m);
-                    currentUserIdentity = m;
-                    document.getElementById('identity-modal').style.display = 'none';
-                    startApp();
-                };
+                let btn = document.createElement('button'); btn.className = 'identity-btn'; btn.innerText = m;
+                btn.onclick = () => { localStorage.setItem('tokyo_identity_26', m); currentUserIdentity = m; document.getElementById('identity-modal').style.display = 'none'; startApp(); };
                 grid.appendChild(btn);
-
                 paxGrid.innerHTML += `<label class="checkbox-item"><input type="checkbox" name="iti-pax" value="${m}"> ${m}</label>`;
             });
         }
 
-        function showIdentityModal() { document.getElementById('identity-modal').style.display = 'flex'; }
+        function showIdentityModal() { renderMemberSelectors(); document.getElementById('identity-modal').style.display = 'flex'; }
 
         function startApp() {
             document.getElementById('user-badge').innerText = '🎅 ' + currentUserIdentity;
             document.getElementById('loading').innerText = '正在從聖誕雲端載入行程資料...';
             document.getElementById('loading').style.display = 'block';
 
-            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || [];
-            luggageData = JSON.parse(localStorage.getItem(`lug_${currentUserIdentity}`)) || [];
-            
+            // 調整過濾器，讓自己排在最前面
+            currentFilter = currentUserIdentity;
+            renderFlightFilters();
+            renderFlightsTab();
+
+            shoppingData = JSON.parse(localStorage.getItem(`shop_${currentUserIdentity}`)) || []; luggageData = JSON.parse(localStorage.getItem(`lug_${currentUserIdentity}`)) || [];
             db.ref(`users/${currentUserIdentity}/todo`).on('value', snap => {
-                todoData = [];
-                if (snap.exists()) {
-                    let td = snap.val();
-                    for(let key in td) { td[key].id = key; todoData.push(td[key]); }
-                }
+                todoData = []; if (snap.exists()) { let td = snap.val(); for(let key in td) { td[key].id = key; todoData.push(td[key]); } }
                 renderTodoList();
             });
-
-            renderShoppingList();
-            renderLuggageList();
+            renderShoppingList(); renderLuggageList();
 
             db.ref('system/migrated').once('value').then(snap => {
-                if (!snap.exists()) performMigrationFromCSV();
-                else listenToItinerary();
+                if (!snap.exists()) performMigrationFromCSV(); else listenToItinerary();
             });
         }
 
         function listenToItinerary() {
             db.ref('itinerary').on('value', snapshot => {
-                globalItinerary = {};
-                if (snapshot.exists()) globalItinerary = snapshot.val();
+                globalItinerary = {}; if (snapshot.exists()) globalItinerary = snapshot.val();
                 document.getElementById('loading').style.display = 'none';
-                updateFiltersAndTabs();
-                renderItinerary();
+                updateFiltersAndTabs(); renderItinerary();
             });
         }
 
         function updateFiltersAndTabs() {
-            const fContainer = document.getElementById('filter-container');
-            const dContainer = document.getElementById('date-tabs');
+            const fContainer = document.getElementById('filter-container'); const dContainer = document.getElementById('date-tabs');
             
-            fContainer.innerHTML = `<button class="filter-btn ${currentFilter==='all'?'active':''}" onclick="setFilter('all')">全員行程</button>`;
-            MEMBERS.forEach(m => {
-                fContainer.innerHTML += `<button class="filter-btn ${currentFilter===m?'active':''}" onclick="setFilter('${m}')">${m}</button>`;
+            // 讓自己排第一個，然後是全員，再來是其他人
+            fContainer.innerHTML = '';
+            let sortedMembers = [currentUserIdentity, 'all'];
+            MEMBERS.forEach(m => { if(m !== currentUserIdentity) sortedMembers.push(m); });
+            
+            sortedMembers.forEach(m => {
+                let text = m === 'all' ? '全員行程' : m;
+                let activeClass = currentFilter === m ? 'active' : '';
+                fContainer.innerHTML += `<button class="filter-btn ${activeClass}" onclick="setFilter('${m}')">${text}</button>`;
             });
 
-            let dates = ['11/14','11/15','11/16','11/17','11/18','11/19','11/20','11/21','11/22'];
+            let allDates = ['11/14','11/15','11/16','11/17','11/18','11/19','11/20','11/21','11/22'];
+            let datesToShow = allDates;
+            if (currentFilter !== 'all' && MEMBER_STAY_RANGE[currentFilter]) {
+                let r = MEMBER_STAY_RANGE[currentFilter]; datesToShow = allDates.filter(d => d >= r.start && d <= r.end);
+            }
+            if (datesToShow.length > 0 && !datesToShow.includes(currentDate)) currentDate = datesToShow[0];
+
             dContainer.innerHTML = '';
-            dates.forEach(d => {
+            datesToShow.forEach(d => {
                 let isActive = currentDate === d ? 'active' : '';
                 let dayMap = {'11/14':'六','11/15':'日','11/16':'一','11/17':'二','11/18':'三','11/19':'四','11/20':'五','11/21':'六','11/22':'日'};
-                dContainer.innerHTML += `
-                    <div class="date-tab ${isActive}" onclick="setDate('${d}')">
-                        <span class="day">${dayMap[d]}</span>
-                        <span class="date">${d.split('/')[1]}</span>
-                    </div>`;
+                dContainer.innerHTML += `<div class="date-tab ${isActive}" onclick="setDate('${d}')"><span class="day">${dayMap[d]}</span><span class="date">${d.split('/')[1]}</span></div>`;
             });
         }
 
@@ -692,92 +431,139 @@
         function setDate(d) { currentDate = d; updateFiltersAndTabs(); renderItinerary(); }
 
         function renderItinerary() {
-            const container = document.getElementById('itinerary-container');
-            container.innerHTML = '';
-            
+            const container = document.getElementById('itinerary-container'); container.innerHTML = '';
             let dailyItems = [];
             for (let key in globalItinerary) {
                 let row = globalItinerary[key];
                 if (row.date === currentDate) {
                     let match = false;
-                    if (currentFilter === 'all') match = true;
-                    else if (row.pax && row.pax.includes(currentFilter)) match = true;
+                    if (currentFilter === 'all') match = true; else if (row.pax && row.pax.includes(currentFilter)) match = true;
                     if (match) { row.id = key; dailyItems.push(row); }
                 }
             }
 
             dailyItems.sort((a, b) => {
-                let orderA = a.order !== undefined ? a.order : 9999;
-                let orderB = b.order !== undefined ? b.order : 9999;
+                let orderA = a.order !== undefined ? a.order : 9999; let orderB = b.order !== undefined ? b.order : 9999;
                 if (orderA !== orderB) return orderA - orderB;
-                let tA = parseInt((a.startTime||'99:99').replace(':',''));
-                let tB = parseInt((b.startTime||'99:99').replace(':',''));
+                let tA = parseInt((a.startTime||'99:99').replace(':','')); let tB = parseInt((b.startTime||'99:99').replace(':',''));
                 return (tA || 9999) - (tB || 9999);
             });
 
-            if (dailyItems.length === 0) {
-                container.innerHTML = '<div style="text-align:center; padding: 40px; color:white; font-weight:900; opacity:0.5;">此日無行程 ❄️</div>';
-                initSortable(); return;
-            }
+            if (dailyItems.length === 0) { container.innerHTML = '<div style="text-align:center; padding: 40px; color:white; font-weight:900; opacity:0.5;">此日無行程 ❄️</div>'; initSortable(); return; }
 
             dailyItems.forEach(row => {
-                let themeClass = 'theme-default';
-                let watermark = '🎁';
-                let t = row.tag || '';
-                if (t.includes('吃') || t.includes('餐')) { themeClass = 'theme-food'; watermark = '🍗'; }
-                else if (t.includes('景點') || t.includes('遊')) { themeClass = 'theme-attraction'; watermark = '🎄'; }
-                else if (t.includes('交通') || t.includes('機')) { themeClass = 'theme-transport'; watermark = '🛷'; }
-                else if (t.includes('住') || t.includes('退房')) { themeClass = 'theme-hotel'; watermark = '🔔'; }
-                else if (t.includes('買') || t.includes('購物')) { themeClass = 'theme-shop'; watermark = '🛍️'; }
+                let themeClass = 'theme-default'; let watermark = '🎁'; let tStr = row.tag || '';
+                if (tStr.includes('吃') || tStr.includes('餐')) { themeClass = 'theme-food'; watermark = '🍗'; }
+                else if (tStr.includes('逛') || tStr.includes('買') || tStr.includes('購物')) { themeClass = 'theme-shop'; watermark = '🛍️'; }
+                else if (tStr.includes('景點') || tStr.includes('遊') || tStr.includes('看')) { themeClass = 'theme-attraction'; watermark = '🎄'; }
+                else if (tStr.includes('交通') || tStr.includes('機') || tStr.includes('其他')) { themeClass = 'theme-transport'; watermark = '🛷'; }
+                else if (tStr.includes('住') || tStr.includes('退房')) { themeClass = 'theme-hotel'; watermark = '🔔'; }
 
                 let timeParts = [];
                 if(row.period) timeParts.push(row.period);
-                if(row.startTime && row.endTime) timeParts.push(`${row.startTime} - ${row.endTime}`);
-                else if(row.startTime) timeParts.push(row.startTime);
+                if(row.startTime && row.endTime) timeParts.push(`${row.startTime} - ${row.endTime}`); else if(row.startTime) timeParts.push(row.startTime);
                 let timeHtml = timeParts.length > 0 ? `<div class="time-badge">🕒 ${timeParts.join(' ')}</div>` : '';
                 
-                let paxHtml = row.pax ? `<div class="tag-pill" style="background:rgba(211, 47, 47, 0.4); border-color:rgba(211,47,47,0.8);">🎅 ${row.pax.join(', ')}</div>` : '';
-                let tagHtml = row.tag ? `<div class="tag-pill">${row.tag}</div>` : '';
                 let noteHtml = row.notes ? `<div class="card-note">${row.notes.replace(/\n/g, '<br>')}</div>` : '';
                 
-                let mapHtml = row.mapUrl ? `<a href="${row.mapUrl}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 聖誕地圖導航</a>` : '';
-
                 let detailsContent = '';
-                if (row.traffic) detailsContent += `<p style="color:#FFF;"><strong>🛷 交通路線：</strong><br><span style="color:#94A3B8;">${row.traffic.replace(/\n/g, '<br>')}</span></p>`;
-                if (row.links) detailsContent += `<p style="color:#FFF;"><strong>🔗 相關連結：</strong><br><span style="color:#94A3B8;">${row.links.replace(/\n/g, '<br>')}</span></p>`;
-                let detailsHtml = detailsContent ? `<button class="expand-btn" style="background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);" onclick="toggleDetails(this)">顯示詳細資訊 ▾</button><div class="details-box" style="display:none; background:rgba(0,0,0,0.4); border-color:rgba(255,255,255,0.1);">${detailsContent}</div>` : '';
-
+                if (row.traffic) detailsContent += `<p style="color:#FFF; margin-bottom:8px;"><strong>🛷 交通路線：</strong><br><span style="color:#94A3B8;">${row.traffic.replace(/\n/g, '<br>')}</span></p>`;
+                if (row.links) detailsContent += `<p style="color:#FFF;"><strong>🔗 相關連結：</strong><br><span style="color:#94A3B8; word-break:break-all;">${row.links.replace(/\n/g, '<br>')}</span></p>`;
+                
+                let detailsHtml = '';
+                if (detailsContent) {
+                    detailsHtml = `
+                        <button class="expand-btn" style="width:100%; background:rgba(255,255,255,0.05); color:#94A3B8; border:1px solid rgba(255,255,255,0.1); padding:10px 14px; border-radius:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; cursor:pointer;" onclick="toggleDetails(this)">
+                            <span>📋 查看詳細資訊 (交通 / 連結)</span><span style="font-size:16px;">▾</span>
+                        </button>
+                        <div class="details-box" style="display:none; background:rgba(0,0,0,0.3); padding:12px 14px; border-radius:12px; font-size:13.5px; line-height:1.5; color:#CBD0E1; border:1px solid rgba(255,255,255,0.05); margin-bottom:12px;">
+                            ${detailsContent}
+                        </div>`;
+                }
+                
+                let paxHtml = row.pax && row.pax.length > 0 ? `<span class="tag-pill" style="background:rgba(211, 47, 47, 0.4); border-color:rgba(211,47,47,0.8);">🎅 ${row.pax.join(', ')}</span>` : '';
+                let tagsHtml = '';
+                if (row.tag) {
+                    let tagsArr = row.tag.split(',').map(s=>s.trim()).filter(s=>s);
+                    tagsArr.forEach(tag => { tagsHtml += `<span class="tag-pill">${tag}</span>`; });
+                }
+                
+                let paxAndTagHtml = (paxHtml || tagsHtml) ? `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; align-items:center;">${paxHtml}${tagsHtml}</div>` : '';
+                let mapHtml = row.mapUrl ? `<a href="${row.mapUrl}" target="_blank" class="map-btn"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 聖誕地圖導航</a>` : '';
                 let dragHtml = currentFilter === 'all' ? `<div class="drag-handle">⋮⋮</div>` : '';
-                let pl = currentFilter === 'all' ? '36px' : '18px';
 
                 let card = document.createElement('div');
-                card.className = `card ${themeClass}`;
-                card.style.paddingLeft = pl;
-                card.dataset.id = row.id;
+                card.className = `card ${themeClass}`; card.dataset.id = row.id;
                 
                 card.innerHTML = `
                     ${dragHtml}
-                    <div class="card-actions">
-                        <div class="icon-btn" onclick="editItinerary('${row.id}')">✏️</div>
-                        <div class="icon-btn" onclick="delItinerary('${row.id}')">🗑️</div>
-                    </div>
-                    <div class="card-content">
-                        ${timeHtml}${paxHtml}${tagHtml}
-                        <div class="card-title">${row.title}</div>
-                        ${noteHtml}${detailsHtml}${mapHtml}
-                    </div>
-                    <div class="card-watermark">${watermark}</div>
-                `;
+                    <div class="card-inner">
+                        <div class="card-actions"><div class="icon-btn" onclick="editItinerary('${row.id}')">✏️</div><div class="icon-btn" onclick="delItinerary('${row.id}')">🗑️</div></div>
+                        <div class="card-content">
+                            ${timeHtml}
+                            <div class="card-title">${row.title}</div>
+                            ${noteHtml}
+                            ${detailsHtml}
+                            ${paxAndTagHtml}
+                            ${mapHtml}
+                        </div>
+                        <div class="card-watermark">${watermark}</div>
+                    </div>`;
                 container.appendChild(card);
             });
+
+            // 顯示當日飯店與導航 (不論誰登入，有住宿的都要顯示)
+            let hName = OVERNIGHT_SCHEDULE[currentDate];
+            if (hName) {
+                let showOvernight = false;
+                if (currentFilter === 'all') showOvernight = true;
+                else {
+                    let stay = MEMBER_STAY_RANGE[currentFilter];
+                    if (stay && currentDate >= stay.start && currentDate < stay.end) showOvernight = true;
+                }
+
+                if (showOvernight) {
+                    let hMap = "";
+                    let cleanTarget = hName.replace(/\s+/g, '').toLowerCase();
+                    for (let h of hotelDataCache) {
+                        let nameInCsv = (h['飯店名稱'] || h['飯店'] || h['Name'] || Object.values(h)[0] || '').replace(/\s+/g, '').toLowerCase();
+                        if (nameInCsv && (nameInCsv.includes(cleanTarget) || cleanTarget.includes(nameInCsv))) {
+                            for (let key in h) { if (key.toLowerCase().includes('map') || key.toLowerCase().includes('地圖')) { hMap = h[key]; break; } }
+                            break;
+                        }
+                    }
+                    if (!hMap) {
+                        const FALLBACK_HOTEL_MAPS = {
+                            '相鐵 FRESA INN': 'https://maps.app.goo.gl/x6TNUoGPjsmMHNgZ6', '富士暁月湖凪Konagi': 'https://maps.google.com/?q=富士暁月湖凪+Konagi',
+                            '湯本富士屋酒店': 'https://maps.google.com/?q=湯本富士屋ホテル', '押上 Airbnb': 'https://maps.google.com/?q=押上'
+                        };
+                        hMap = FALLBACK_HOTEL_MAPS[hName] || '';
+                    }
+                    
+                    let mapBtn = hMap ? `<a href="${hMap}" target="_blank" class="map-btn" style="margin-top:10px;"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> 飯店地圖導航</a>` : '';
+                    
+                    let hotelCard = document.createElement('div');
+                    hotelCard.className = 'card theme-hotel'; hotelCard.style.marginTop = '16px';
+                    hotelCard.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-content">
+                                <div style="font-size:13px; color:#CE93D8; font-weight:900; margin-bottom:6px;">🌙 今晚入住</div>
+                                <div class="card-title" style="margin-bottom:0;">${hName}</div>
+                                ${mapBtn}
+                            </div>
+                            <div class="card-watermark">🏨</div>
+                        </div>`;
+                    container.appendChild(hotelCard);
+                }
+            }
 
             initSortable();
         }
 
         function toggleDetails(btn) {
             let box = btn.nextElementSibling;
-            if(box.style.display === 'none') { box.style.display = 'block'; btn.innerText = '收起詳細資訊 ▴'; } 
-            else { box.style.display = 'none'; btn.innerText = '顯示詳細資訊 ▾'; }
+            if(box.style.display === 'none') { box.style.display = 'block'; btn.querySelector('span:nth-child(2)').innerText = '▴'; } 
+            else { box.style.display = 'none'; btn.querySelector('span:nth-child(2)').innerText = '▾'; }
         }
 
         function initSortable() {
@@ -785,11 +571,12 @@
             if (sortableInstance) sortableInstance.destroy();
             if (currentFilter === 'all') {
                 sortableInstance = new Sortable(el, {
-                    handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost',
+                    handle: '.drag-handle', animation: 150, delay: 100, delayOnTouchOnly: true, ghostClass: 'sortable-ghost',
                     onEnd: function () {
-                        let items = el.querySelectorAll('.card');
-                        let updates = {};
-                        items.forEach((item, index) => { updates[`itinerary/${item.dataset.id}/order`] = index; });
+                        let items = el.querySelectorAll('.card'); let updates = {};
+                        items.forEach((item, index) => { 
+                            if(item.dataset.id) updates[`itinerary/${item.dataset.id}/order`] = index; 
+                        });
                         db.ref().update(updates);
                     }
                 });
@@ -797,54 +584,40 @@
         }
 
         function openItineraryModal() {
-            document.getElementById('iti-id').value = '';
-            document.getElementById('iti-title').value = '';
-            document.getElementById('iti-date').value = currentDate;
-            document.getElementById('iti-period').value = '上午';
-            document.getElementById('iti-start').value = '';
-            document.getElementById('iti-end').value = '';
-            document.getElementById('iti-tag').value = '';
-            document.getElementById('iti-map').value = '';
-            document.getElementById('iti-traffic').value = '';
-            document.getElementById('iti-notes').value = '';
-            document.getElementById('iti-links').value = '';
+            document.getElementById('iti-id').value = ''; document.getElementById('iti-title').value = '';
+            document.getElementById('iti-date').value = currentDate; document.getElementById('iti-period').value = '上午';
+            document.getElementById('iti-start').value = ''; document.getElementById('iti-end').value = '';
+            document.getElementById('iti-map').value = ''; document.getElementById('iti-traffic').value = '';
+            document.getElementById('iti-notes').value = ''; document.getElementById('iti-links').value = '';
+            document.querySelectorAll('input[name="iti-tag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => cb.checked = true);
             document.getElementById('iti-modal-title').innerText = '新增行程';
             document.getElementById('itinerary-modal').style.display = 'flex';
         }
 
         function editItinerary(id) {
-            let row = globalItinerary[id];
-            if(!row) return;
-            document.getElementById('iti-id').value = id;
-            document.getElementById('iti-title').value = row.title || '';
-            document.getElementById('iti-date').value = row.date || currentDate;
-            document.getElementById('iti-period').value = row.period || '上午';
-            document.getElementById('iti-start').value = row.startTime || '';
-            document.getElementById('iti-end').value = row.endTime || '';
-            document.getElementById('iti-tag').value = row.tag || '';
-            document.getElementById('iti-map').value = row.mapUrl || '';
-            document.getElementById('iti-traffic').value = row.traffic || '';
-            document.getElementById('iti-notes').value = row.notes || '';
-            document.getElementById('iti-links').value = row.links || '';
+            let row = globalItinerary[id]; if(!row) return;
+            document.getElementById('iti-id').value = id; document.getElementById('iti-title').value = row.title || '';
+            document.getElementById('iti-date').value = row.date || currentDate; document.getElementById('iti-period').value = row.period || '上午';
+            document.getElementById('iti-start').value = row.startTime || ''; document.getElementById('iti-end').value = row.endTime || '';
+            document.getElementById('iti-map').value = row.mapUrl || ''; document.getElementById('iti-traffic').value = row.traffic || '';
+            document.getElementById('iti-notes').value = row.notes || ''; document.getElementById('iti-links').value = row.links || '';
+            let savedTags = (row.tag || '').split(',').map(s=>s.trim());
+            document.querySelectorAll('input[name="iti-tag"]').forEach(cb => { cb.checked = savedTags.includes(cb.value); });
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => { cb.checked = row.pax && row.pax.includes(cb.value); });
-            document.getElementById('iti-modal-title').innerText = '編輯行程';
-            document.getElementById('itinerary-modal').style.display = 'flex';
+            document.getElementById('iti-modal-title').innerText = '編輯行程'; document.getElementById('itinerary-modal').style.display = 'flex';
         }
 
         function saveItinerary() {
-            let id = document.getElementById('iti-id').value;
-            let title = document.getElementById('iti-title').value.trim();
+            let id = document.getElementById('iti-id').value; let title = document.getElementById('iti-title').value.trim();
             if(!title) { alert("請輸入行程名稱！"); return; }
-            let pax = [];
-            document.querySelectorAll('input[name="iti-pax"]:checked').forEach(cb => pax.push(cb.value));
-            
+            let pax = []; document.querySelectorAll('input[name="iti-pax"]:checked').forEach(cb => pax.push(cb.value));
+            let tags = []; document.querySelectorAll('input[name="iti-tag"]:checked').forEach(cb => tags.push(cb.value));
             let data = {
                 title: title, date: document.getElementById('iti-date').value, period: document.getElementById('iti-period').value,
                 startTime: document.getElementById('iti-start').value, endTime: document.getElementById('iti-end').value,
-                tag: document.getElementById('iti-tag').value, mapUrl: document.getElementById('iti-map').value,
-                traffic: document.getElementById('iti-traffic').value, notes: document.getElementById('iti-notes').value,
-                links: document.getElementById('iti-links').value, pax: pax
+                tag: tags.join(', '), mapUrl: document.getElementById('iti-map').value, traffic: document.getElementById('iti-traffic').value,
+                notes: document.getElementById('iti-notes').value, links: document.getElementById('iti-links').value, pax: pax
             };
             if (id) { data.order = globalItinerary[id].order || 999; db.ref(`itinerary/${id}`).set(data); } 
             else { data.order = 999; db.ref('itinerary').push(data); }
@@ -853,13 +626,213 @@
 
         function delItinerary(id) { if(confirm("確定要刪除這個行程嗎？")) db.ref(`itinerary/${id}`).remove(); }
 
-        // 其他頁籤切換邏輯
+        // ==========================================
+        // 航班資訊與設計
+        // ==========================================
+        let currentFlightFilter = 'all';
+
+        function parseFlightsData(raw) {
+            flightCombinedData = [];
+            let paxMap = {}; // paxName -> { inbound: {}, outbound: {} }
+            
+            raw.forEach(row => {
+                let keys = Object.keys(row);
+                let paxRaw = String(row['朋朋'] || row['姓名'] || (keys[0] ? row[keys[0]] : '') || '').trim();
+                if (!paxRaw || paxRaw === '朋朋' || paxRaw === '姓名') return;
+                
+                let isOutbound = paxRaw.includes('回程') || String(row['起飛時間'] || '').includes('18:25') || String(row['起飛時間'] || '').includes('17:45'); // 簡單辨識回程特徵
+                
+                let date = '11/14 (六)';
+                if (String(row['起飛時間']).includes('02:30') || String(row['起飛時間']).includes('18:25') || String(row['起飛時間']).includes('17:45') || String(row['起飛時間']).includes('20:10') || String(row['起飛時間']).includes('20:25')) {
+                    date = '待填'; // 透過更精準的方式去解析
+                }
+                
+                // 這裡我們直接使用一個簡單的配對邏輯：
+                // 如果 paxRaw 是成員名字，就在 map 中記錄
+                let names = paxRaw.split(/[,、，]/).map(n=>normalizeName(n.trim())).filter(n=>n);
+                let flightNo = String(row['航班'] || (keys[1] ? row[keys[1]] : '') || '').trim();
+                let depTime = String(row['起飛時間'] || (keys[2] ? row[keys[2]] : '') || '').trim();
+                let arrTime = String(row['抵達時間'] || (keys[3] ? row[keys[3]] : '') || '').trim();
+                
+                if(!flightNo || flightNo === '') return; // 忽略空白行
+
+                let flightObj = { flightNo, depTime, arrTime };
+                let airline = '待確認';
+                if(flightNo.startsWith('IT')) airline = '台灣虎航 Tigerair';
+                else if(flightNo.startsWith('JX')) airline = '星宇航空 STARLUX';
+                else if(flightNo.startsWith('CI')) airline = '中華航空 China Airlines';
+                else if(flightNo.startsWith('BR')) airline = '長榮航空 EVA Air';
+                else if(flightNo.startsWith('GK')) airline = '捷星航空 Jetstar';
+                else if(flightNo.startsWith('UA')) airline = '聯合航空 United';
+                flightObj.airline = airline;
+
+                names.forEach(n => {
+                    if (!paxMap[n]) paxMap[n] = { inbound: null, outbound: null };
+                    // 根據 flightNo 和 depTime 判斷去回
+                    if (['IT200','JX800','UA838','CI126','CI108','CI102','GK12'].includes(flightNo.toUpperCase())) {
+                        paxMap[n].inbound = flightObj;
+                        if(flightNo === 'CI102') paxMap[n].inbound.date = '11/15 (日)';
+                        else if(flightNo === 'GK12') paxMap[n].inbound.date = '11/19 (四)';
+                        else paxMap[n].inbound.date = '11/14 (六)';
+                    } else if (['CI127','CI105','UA837','JX805','IT203'].includes(flightNo.toUpperCase())) {
+                        paxMap[n].outbound = flightObj;
+                        if(flightNo === 'CI127') paxMap[n].outbound.date = '11/19 (四)';
+                        else paxMap[n].outbound.date = '11/22 (日)';
+                    }
+                });
+            });
+
+            // 轉換成陣列
+            for (let name in paxMap) {
+                if (MEMBERS.includes(name)) {
+                    flightCombinedData.push({ name: name, inbound: paxMap[name].inbound, outbound: paxMap[name].outbound });
+                }
+            }
+            
+            // 加入那些可能沒解析成功的成員給個預設空值
+            MEMBERS.forEach(m => {
+                if(!flightCombinedData.find(f=>f.name===m)) flightCombinedData.push({ name: m, inbound: null, outbound: null });
+            });
+        }
+
+        function renderFlightFilters() {
+            const container = document.getElementById('flight-filter-container');
+            container.innerHTML = '';
+            
+            // 讓自己排第一個，然後是全員，再來是其他人
+            let sortedMembers = [currentUserIdentity, 'all'];
+            MEMBERS.forEach(m => { if(m !== currentUserIdentity) sortedMembers.push(m); });
+            
+            sortedMembers.forEach(m => {
+                let text = m === 'all' ? '全員航班' : m;
+                let activeClass = currentFlightFilter === m ? 'active' : '';
+                container.innerHTML += `<button class="filter-btn ${activeClass}" onclick="setFlightFilter('${m}')">${text}</button>`;
+            });
+        }
+        
+        function setFlightFilter(f) { currentFlightFilter = f; renderFlightFilters(); renderFlightsTab(); }
+
+        function renderFlightsTab() {
+            let container = document.getElementById('flights-ticket-container');
+            container.innerHTML = '';
+            
+            let dataToShow = flightCombinedData;
+            if (currentFlightFilter !== 'all') {
+                dataToShow = flightCombinedData.filter(f => f.name === currentFlightFilter);
+            }
+
+            if (dataToShow.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:white; opacity:0.5; font-weight:900;">沒有符合的航班資料</div>`;
+                return;
+            }
+
+            dataToShow.forEach(data => {
+                let inB = data.inbound;
+                let outB = data.outbound;
+                
+                let inHtml = inB ? `
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:12px; color:var(--accent-gold); font-weight:900; margin-bottom:8px;">🛬 去程 DEPARTURE - ${inB.date}</div>
+                        <div class="flight-route">
+                            <div class="flight-port"><h2>TPE</h2></div><div class="plane-icon">✈️</div><div class="flight-port"><h2>NRT</h2></div>
+                        </div>
+                        <div class="flight-info-row">
+                            <div class="flight-info-col"><label>航班</label><span>${inB.airline} <br>${inB.flightNo}</span></div>
+                            <div class="flight-info-col" style="text-align:center;"><label>起飛</label><span>${inB.depTime}</span></div>
+                            <div class="flight-info-col" style="text-align:right;"><label>抵達</label><span>${inB.arrTime}</span></div>
+                        </div>
+                    </div>
+                ` : `<div style="margin-bottom:16px; color:#94A3B8; font-size:13px; font-weight:900;">🛬 去程 DEPARTURE - 尚未填寫</div>`;
+
+                let outHtml = outB ? `
+                    <div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:16px;">
+                        <div style="font-size:12px; color:var(--accent-gold); font-weight:900; margin-bottom:8px;">🛫 回程 RETURN - ${outB.date}</div>
+                        <div class="flight-route">
+                            <div class="flight-port"><h2>NRT</h2></div><div class="plane-icon" style="transform: translateX(-50%) scaleX(-1);">✈️</div><div class="flight-port"><h2>TPE</h2></div>
+                        </div>
+                        <div class="flight-info-row">
+                            <div class="flight-info-col"><label>航班</label><span>${outB.airline} <br>${outB.flightNo}</span></div>
+                            <div class="flight-info-col" style="text-align:center;"><label>起飛</label><span>${outB.depTime}</span></div>
+                            <div class="flight-info-col" style="text-align:right;"><label>抵達</label><span>${outB.arrTime}</span></div>
+                        </div>
+                    </div>
+                ` : `<div style="border-top:1px dashed rgba(255,255,255,0.2); padding-top:16px; color:#94A3B8; font-size:13px; font-weight:900;">🛫 回程 RETURN - 尚未填寫</div>`;
+
+                container.innerHTML += `
+                    <div class="flight-card">
+                        <div class="flight-card-header">
+                            <h3 style="margin:0; font-size:20px;">🎅 ${data.name} 的機票</h3>
+                        </div>
+                        <div class="flight-card-body">
+                            ${inHtml}
+                            ${outHtml}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // ==========================================
+        // 其他系統
+        // ==========================================
+        function performMigrationFromCSV() {
+            Papa.parse(CSV_URL + '&t=' + Date.now(), {
+                download: true, header: true, skipEmptyLines: true,
+                complete: function(results) {
+                    let rows = results.data; let updates = {}; let order = 0; let headerIndex = -1;
+                    for (let i = 0; i < Math.min(5, rows.length); i++) {
+                        let vals = Object.values(rows[i]).map(v=>String(v).trim());
+                        if(vals.includes('日期') || vals.includes('Date')) { headerIndex = i; break; }
+                    }
+                    let cleanRows = [];
+                    if(headerIndex !== -1) {
+                        let headers = rows[headerIndex];
+                        for(let i = headerIndex+1; i < rows.length; i++) { let r = {}; for(let k in rows[i]) r[headers[k] || k] = rows[i][k]; cleanRows.push(r); }
+                    } else { cleanRows = rows; }
+
+                    cleanRows.forEach(row => {
+                        let date = getVal(row, ['日期','Date']); let title = getVal(row, ['行程名稱','行程','Title']);
+                        if(!date || !title) return;
+                        
+                        let paxStr = getVal(row, ['參與者','成員','Pax']);
+                        let pax = paxStr ? paxStr.split(/[,、，]/).map(m=>m.trim().replace(/仁傑/g, '傑')).filter(m=>m) : [];
+                        
+                        let oldTag = getVal(row, ['tag','Tag']);
+                        let newTags = [];
+                        if(oldTag) {
+                            if(oldTag.includes('吃') || oldTag.includes('餐')) newTags.push('🍣 吃的');
+                            if(oldTag.includes('逛') || oldTag.includes('買')) newTags.push('🛍️ 逛的');
+                            if(oldTag.includes('景點') || oldTag.includes('遊')) newTags.push('🗼 看的');
+                            if(oldTag.includes('機') || oldTag.includes('車')) newTags.push('🚗 其他');
+                        }
+
+                        let newId = 'mig_' + Date.now() + '_' + order;
+                        updates[newId] = {
+                            date: date.split(' ')[0], title: title, period: getVal(row, ['時段','Period']),
+                            startTime: getVal(row, ['開始時間','Start']), endTime: getVal(row, ['結束時間','End']),
+                            tag: newTags.join(', '), notes: getVal(row, ['行程細項與筆記','筆記']),
+                            traffic: getVal(row, ['交通路線','交通']), links: getVal(row, ['相關連結','連結']),
+                            mapUrl: getVal(row, ['google map','地圖']), pax: pax, order: order++
+                        };
+                    });
+                    db.ref('itinerary').set(updates).then(() => { db.ref('system/migrated').set(true); listenToItinerary(); });
+                }
+            });
+        }
+        function getVal(row, keys) {
+            if (!row || typeof row !== 'object') return '';
+            for (let k of keys) { if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim(); }
+            for (let rk in row) {
+                if (!rk) continue; let clean = String(rk).trim().replace(/^\ufeff/, '');
+                for (let k of keys) { if (clean.toLowerCase() === String(k).toLowerCase()) { if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== '') return String(row[rk]).trim(); } }
+            }
+            return '';
+        }
         function switchView(viewName, element) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${viewName}`).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-            window.scrollTo(0,0);
+            element.classList.add('active'); window.scrollTo(0,0);
         }
         function switchSubView(parentId, subName, element) {
             const parent = document.getElementById(parentId);
@@ -869,142 +842,15 @@
             element.classList.add('active');
         }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // ==========================================
-        // 初始化時從 Google 試算表匯入舊資料
-        // ==========================================
-        function performMigrationFromCSV() {
-            Papa.parse(CSV_URL + '&t=' + Date.now(), {
-                download: true, header: true, skipEmptyLines: true,
-                complete: function(results) {
-                    let rows = results.data;
-                    let updates = {};
-                    let order = 0;
-                    let headerIndex = -1;
-                    for (let i = 0; i < Math.min(5, rows.length); i++) {
-                        let vals = Object.values(rows[i]).map(v=>String(v).trim());
-                        if(vals.includes('日期') || vals.includes('Date')) { headerIndex = i; break; }
-                    }
-                    let cleanRows = [];
-                    if(headerIndex !== -1) {
-                        let headers = rows[headerIndex];
-                        for(let i = headerIndex+1; i < rows.length; i++) {
-                            let r = {};
-                            for(let k in rows[i]) r[headers[k] || k] = rows[i][k];
-                            cleanRows.push(r);
-                        }
-                    } else { cleanRows = rows; }
-
-                    cleanRows.forEach(row => {
-                        let date = getVal(row, ['日期','Date']);
-                        let title = getVal(row, ['行程名稱','行程','Title']);
-                        if(!date || !title) return;
-                        
-                        let paxStr = getVal(row, ['參與者','成員','Pax']);
-                        let pax = paxStr ? paxStr.split(/[,、，]/).map(m=>m.trim().replace(/仁傑/g, '傑')).filter(m=>m) : [];
-
-                        let newId = 'mig_' + Date.now() + '_' + order;
-                        updates[newId] = {
-                            date: date.split(' ')[0], title: title, period: getVal(row, ['時段','Period']),
-                            startTime: getVal(row, ['開始時間','Start']), endTime: getVal(row, ['結束時間','End']),
-                            tag: getVal(row, ['tag','Tag']), notes: getVal(row, ['行程細項與筆記','筆記']),
-                            traffic: getVal(row, ['交通路線','交通']), links: getVal(row, ['相關連結','連結']),
-                            mapUrl: getVal(row, ['google map','地圖']), pax: pax, order: order++
-                        };
-                    });
-
-                    db.ref('itinerary').set(updates).then(() => {
-                        db.ref('system/migrated').set(true);
-                        listenToItinerary();
-                    });
-                }
-            });
-        }
         
-        function getVal(row, keys) {
-            if (!row || typeof row !== 'object') return '';
-            for (let k of keys) { if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim(); }
-            for (let rk in row) {
-                if (!rk) continue;
-                let clean = String(rk).trim().replace(/^\ufeff/, '');
-                for (let k of keys) { if (clean.toLowerCase() === String(k).toLowerCase()) { if (row[rk] !== undefined && row[rk] !== null && String(row[rk]).trim() !== '') return String(row[rk]).trim(); } }
-            }
-            return '';
-        }
-
-        // ==========================================
-        // 航班/飯店解析
-        // ==========================================
-        function parseFlightsData(raw) {
-            let currentDir = 'inbound';
-            let currentDt = '';
-            raw.forEach(row => {
-                let keys = Object.keys(row);
-                let paxRaw = String(row['朋朋'] || row['姓名'] || (keys[0] ? row[keys[0]] : '') || '').trim();
-                if (!paxRaw) return;
-                if (paxRaw.includes('去程')) { currentDir = 'inbound'; return; }
-                if (paxRaw.includes('回程')) { currentDir = 'outbound'; return; }
-                if (paxRaw.match(/^\d{1,2}\/\d{1,2}/)) { currentDt = paxRaw; return; }
-                if (paxRaw === '朋朋' || paxRaw === '姓名') return;
-                
-                flightDataCache.push({
-                    direction: currentDir, date: currentDt,
-                    paxRaw: paxRaw, flightNo: String(row['航班'] || (keys[1] ? row[keys[1]] : '') || '').trim() || '待填',
-                    depTime: String(row['起飛時間'] || (keys[2] ? row[keys[2]] : '') || '').trim() || '待填',
-                    arrTime: String(row['抵達時間'] || (keys[3] ? row[keys[3]] : '') || '').trim() || '待填'
-                });
-            });
-        }
-
-        function renderFlightsTab() {
-            let container = document.getElementById('flights-ticket-container');
-            container.innerHTML = '';
-            let inbounds = flightDataCache.filter(f => f.direction === 'inbound');
-            let outbounds = flightDataCache.filter(f => f.direction === 'outbound');
-            
-            if (inbounds.length > 0) {
-                container.innerHTML += `<h3 class="flight-date-title" style="color:var(--accent-gold); margin-bottom:10px;">🛬 去程航班 (DEPARTURE)</h3>`;
-                inbounds.forEach(f => container.innerHTML += createTicketHtml(f, true));
-            }
-            if (outbounds.length > 0) {
-                container.innerHTML += `<h3 class="flight-date-title" style="color:var(--accent-gold); margin-top:20px; margin-bottom:10px;">🛫 回程航班 (RETURN)</h3>`;
-                outbounds.forEach(f => container.innerHTML += createTicketHtml(f, false));
-            }
-        }
-
-        function createTicketHtml(f, isOut) {
-            let portFrom = isOut ? 'TPE' : 'NRT';
-            let portTo = isOut ? 'NRT' : 'TPE';
-            return `
-                <div class="ticket">
-                    <div class="ticket-header">
-                        <h3>${f.paxRaw}</h3><span style="background:rgba(255,255,255,0.2); padding:4px 8px; border-radius:10px; font-size:12px;">${f.flightNo}</span>
-                    </div>
-                    <div class="ticket-body">
-                        <div style="font-size:12px; color:var(--accent-gold); font-weight:900; margin-bottom:10px;">${f.date}</div>
-                        <div class="ticket-route">
-                            <div class="port"><h2>${portFrom}</h2></div>
-                            <div class="plane-icon">✈️</div>
-                            <div class="port"><h2>${portTo}</h2></div>
-                        </div>
-                        <div class="ticket-info">
-                            <div class="info-col"><label>起飛</label><span>${f.depTime}</span></div>
-                            <div class="info-col" style="text-align:right;"><label>抵達</label><span>${f.arrTime}</span></div>
-                        </div>
-                    </div>
-                </div>`;
-        }
-
         function renderHotels() {
-            const container = document.getElementById('hotel-info-container');
-            container.innerHTML = '';
+            const container = document.getElementById('hotel-info-container'); container.innerHTML = '';
             hotelDataCache.forEach((row, i) => {
                 let name = row['飯店名稱'] || row['飯店'] || row['Name'] || Object.values(row)[0] || `飯店 ${i+1}`;
-                let html = `<div class="ticket"><div class="ticket-header"><h3>🏨 ${name}</h3></div><div class="ticket-body" style="padding:20px;">`;
+                let html = `<div class="flight-card"><div class="flight-card-header"><h3>🏨 ${name}</h3></div><div class="flight-card-body">`;
                 for(let key in row) {
                     if(key.includes('機場交通') || key.includes('飯店名稱') || key.includes('飯店')) continue;
-                    let val = row[key];
-                    if(!val || val.trim()==='') continue;
+                    let val = row[key]; if(!val || val.trim()==='') continue;
                     if (val.startsWith('http')) val = `<a href="${val}" target="_blank" style="color:var(--accent-gold); font-weight:900;">📍 地圖連結</a>`;
                     else val = val.replace(/\n/g, '<br>');
                     html += `<div style="margin-bottom:16px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px;">
@@ -1012,14 +858,9 @@
                                 <div style="font-size:15px; font-weight:900; color:white;">${val}</div>
                              </div>`;
                 }
-                html += `</div></div>`;
-                container.innerHTML += html;
+                html += `</div></div>`; container.innerHTML += html;
             });
         }
-
-        // ==========================================
-        // 待辦 / 購物 / 行李
-        // ==========================================
         function saveList(type) {
             if (type === 'shop') { localStorage.setItem(`shop_${currentUserIdentity}`, JSON.stringify(shoppingData)); renderShoppingList(); }
             if (type === 'lug') { localStorage.setItem(`lug_${currentUserIdentity}`, JSON.stringify(luggageData)); renderLuggageList(); }
@@ -1028,31 +869,22 @@
             const name = prompt(msg);
             if (name && name.trim() !== '') {
                 if (type === 'shop') shoppingData.push({ id: 'c_'+Date.now(), name: name.trim(), items: [] });
-                else luggageData.push({ id: 'c_'+Date.now(), name: name.trim(), items: [] });
-                saveList(type);
+                else luggageData.push({ id: 'c_'+Date.now(), name: name.trim(), items: [] }); saveList(type);
             }
         }
         function delCategory(type, id) {
-            if (confirm('確定刪除？')) {
-                if(type==='shop') shoppingData = shoppingData.filter(c=>c.id!==id); else luggageData = luggageData.filter(c=>c.id!==id);
-                saveList(type);
-            }
+            if (confirm('確定刪除？')) { if(type==='shop') shoppingData = shoppingData.filter(c=>c.id!==id); else luggageData = luggageData.filter(c=>c.id!==id); saveList(type); }
         }
         function openItemModal(type, catId) {
             document.getElementById('targetListType').value = type; document.getElementById('targetCategoryId').value = catId;
-            document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = ''; document.getElementById('itemTags').value = '';
-            document.getElementById('tagsInputGroup').style.display = type === 'shop' ? 'block' : 'none';
-            document.getElementById('itemModal').style.display = 'flex';
+            document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = ''; document.getElementById('itemModal').style.display = 'flex';
         }
         function saveListItem() {
             const type = document.getElementById('targetListType').value; const catId = document.getElementById('targetCategoryId').value;
             const name = document.getElementById('itemName').value.trim(); const note = document.getElementById('itemNote').value.trim();
             if (!name) return;
             const data = type === 'shop' ? shoppingData : luggageData; const cat = data.find(c => c.id === catId);
-            if (cat) {
-                cat.items.push({ id: 'i_'+Date.now(), name: name, note: note, tags: [], checked: false });
-                saveList(type); closeModal('itemModal');
-            }
+            if (cat) { cat.items.push({ id: 'i_'+Date.now(), name: name, note: note, tags: [], checked: false }); saveList(type); closeModal('itemModal'); }
         }
         function toggleItem(type, catId, itemId) {
             const data = type === 'shop' ? shoppingData : luggageData; const cat = data.find(c => c.id === catId);
@@ -1068,23 +900,13 @@
             data.forEach(cat => {
                 let itemsHtml = cat.items.map(i => {
                     let note = i.note ? `<div style="font-size:12px; color:#94A3B8; margin-top:4px;">${i.note}</div>` : '';
-                    return `<div class="item-card">
-                        <input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')">
-                        <div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div>
-                        <button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button>
-                    </div>`;
+                    return `<div class="item-card"><input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')"><div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div><button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
                 }).join('');
-                container.innerHTML += `<div style="margin-bottom:24px;">
-                    <div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                        <h3>${cat.name}</h3>
-                        <div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px;">+ 新增</button>
-                        <button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div>
-                    </div><div>${itemsHtml}</div></div>`;
+                container.innerHTML += `<div style="margin-bottom:24px;"><div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:10px;"><h3>${cat.name}</h3><div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px;">+ 新增</button><button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div></div><div>${itemsHtml}</div></div>`;
             });
         }
         function renderShoppingList() { renderGenericList(shoppingData, 'shopping-list-container', 'shop'); }
         function renderLuggageList() { renderGenericList(luggageData, 'luggage-container', 'lug'); }
-
         function openTodoModal() { document.getElementById('todoTask').value = ''; document.getElementById('todoDate').value = ''; document.getElementById('todoNote').value = ''; document.getElementById('todoModal').style.display = 'flex'; }
         function saveTodo() {
             const task = document.getElementById('todoTask').value.trim(); if(!task) return;
@@ -1099,11 +921,7 @@
             todoData.forEach(t => {
                 let d = t.date ? `<span style="font-size:11px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">⏳ ${t.date}</span>` : '';
                 let n = t.note ? `<div style="font-size:12px; color:#94A3B8; margin-top:4px;">${t.note}</div>` : '';
-                container.innerHTML += `<div class="item-card">
-                    <input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')">
-                    <div style="flex:1"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div>
-                    <button onclick="delTodo('${t.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button>
-                </div>`;
+                container.innerHTML += `<div class="item-card"><input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')"><div style="flex:1"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div><button onclick="delTodo('${t.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
             });
         }
     </script>
