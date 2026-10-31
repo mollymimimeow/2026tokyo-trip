@@ -214,7 +214,7 @@
         <div id="view-shopping" class="view-section">
             <div style="padding:16px;">
                 <div class="private-banner">🎁 這是你的私人聖誕購物願望清單</div>
-                <button class="add-btn-large" onclick="addCategory('shop', '輸入分類名稱')">➕ 新增購物分類</button>
+                <div class="fab" onclick="addCategory('shop', '輸入分類名稱')"></div>
                 <div id="shopping-list-container"></div>
             </div>
         </div>
@@ -227,12 +227,12 @@
             </div>
             <div id="sub-todo" class="sub-view active">
                 <div class="private-banner">📝 這是你的私人待辦事項（已加密儲存於雪地雲端）</div>
-                <button class="add-btn-large" onclick="openTodoModal()">➕ 新增待辦事項</button>
+                <div class="fab" onclick="openTodoModal()"></div>
                 <div id="todo-container"></div>
             </div>
             <div id="sub-luggage" class="sub-view">
                 <div class="private-banner">🧳 這是你的私人行李清單</div>
-                <button class="add-btn-large" onclick="addCategory('lug', '輸入行李分類')">➕ 新增行李分類</button>
+                <div class="fab" onclick="addCategory('lug', '輸入行李分類')"></div>
                 <div id="luggage-container"></div>
             </div>
         </div>
@@ -292,16 +292,36 @@
             <div class="input-group"><label>Google Map 連結</label><input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/..."></div>
             <div class="input-group"><label>行程內容</label><textarea class="auto-resize" id="iti-notes" placeholder="例如：名店、需現場排隊..." oninput="autoResize(this)"></textarea></div>
             <div class="input-group"><label>細項與筆記 (交通路線/其他備註)</label><textarea class="auto-resize" id="iti-traffic" placeholder="搭乘地鐵、預約號碼等..." oninput="autoResize(this)"></textarea></div>
-            <div class="input-group"><label>相關連結 (多個連結請換行)</label><textarea class="auto-resize" id="iti-links" placeholder="https://... (多個連結請換行)" oninput="autoResize(this)"></textarea></div>
+            <div class="input-group">
+                <label>相關連結 (最多填寫 3 組)</label>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="iti-link-title-1" placeholder="名稱 1 (例如：活動官網)" style="flex:1;">
+                        <input type="url" id="iti-link-url-1" placeholder="網址 1 (https://...)" style="flex:2;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="iti-link-title-2" placeholder="名稱 2 (例如：線上訂位)" style="flex:1;">
+                        <input type="url" id="iti-link-url-2" placeholder="網址 2 (https://...)" style="flex:2;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="iti-link-title-3" placeholder="名稱 3 (選填)" style="flex:1;">
+                        <input type="url" id="iti-link-url-3" placeholder="網址 3 (選填)" style="flex:2;">
+                    </div>
+                </div>
+            </div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button><button class="btn-save" onclick="saveItinerary()">送出願望</button></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="todoModal">
         <div class="modal-box">
-            <h3>新增待辦事項</h3>
+            <h3 id="todoModalTitle">新增待辦事項</h3>
+            <input type="hidden" id="todoId">
             <div class="input-group"><label>待辦事項 (必填)</label><input type="text" id="todoTask"></div>
-            <div class="input-group"><label>截止日期 (選填)</label><input type="date" id="todoDate"></div>
+            <div style="display:flex; gap:8px;">
+                <div class="input-group" style="flex:1;"><label>截止日期 (選填)</label><input type="date" id="todoDate"></div>
+                <div class="input-group" style="flex:1;"><label>截止時間 (選填)</label><input type="time" id="todoTime"></div>
+            </div>
             <div class="input-group"><label>備註 (選填)</label><textarea class="auto-resize" id="todoNote" oninput="autoResize(this)"></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('todoModal')">取消</button><button class="btn-save" onclick="saveTodo()">儲存</button></div>
         </div>
@@ -312,6 +332,7 @@
             <h3 id="itemModalTitle">新增物品</h3>
             <input type="hidden" id="targetListType">
             <input type="hidden" id="targetCategoryId">
+            <input type="hidden" id="targetItemId">
             <div class="input-group"><label>物品名稱 (必填)</label><input type="text" id="itemName"></div>
             <div class="input-group"><label>備註 (選填)</label><input type="text" id="itemNote"></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itemModal')">取消</button><button class="btn-save" onclick="saveListItem()">儲存</button></div>
@@ -509,13 +530,25 @@
                 // 細項與筆記(原本的 traffic) 放裡面
                 let detailsContent = '';
                 if (row.traffic) detailsContent += `<p style="color:#FFF; margin-bottom:6px;"><strong>🛷 細項與筆記：</strong><br><span style="color:#94A3B8;">${row.traffic.replace(/\n/g, '<br>')}</span></p>`;
-                if (row.links) {
-                    let linksArr = row.links.split('\n').filter(l=>l.trim());
-                    let linksHtml = linksArr.map(l => {
-                        let url = l.trim(); if(!url.startsWith('http')) url = 'http://' + url;
-                        return `<a href="${url}" target="_blank" style="color:var(--accent-gold); word-break:break-all; text-decoration:underline;">${l}</a>`;
-                    }).join('<br>');
-                    detailsContent += `<p style="color:#FFF;"><strong>🔗 相關連結：</strong><br>${linksHtml}</p>`;
+                let activeLinks = row.customLinks || [];
+                if (!row.customLinks && row.links) {
+                    let lines = row.links.split('\n').filter(l => l.trim());
+                    lines.forEach(line => {
+                        let m = line.match(/(https?:\/\/[^\s]+)/);
+                        if (m) {
+                            let u = m[1];
+                            let t = line.replace(u, '').replace(/[:：🔗]/g, '').trim();
+                            activeLinks.push({ title: t || '官方連結', url: u });
+                        }
+                    });
+                }
+                if (activeLinks.length > 0) {
+                    let linksHtml = activeLinks.map(item => {
+                        let u = item.url;
+                        if (!u.startsWith('http://') && !u.startsWith('https://')) u = 'https://' + u;
+                        return `<a href="${u}" target="_blank" style="color:var(--accent-gold); text-decoration:none; display:inline-flex; align-items:center; gap:4px; background:rgba(253,216,53,0.1); border:1px solid rgba(253,216,53,0.3); padding:4px 10px; border-radius:8px; font-size:12px; margin-right:8px; margin-top:6px; font-weight:700;">🔗 ${item.title}</a>`;
+                    }).join('');
+                    detailsContent += `<div style="margin-top:6px;"><strong style="color:#FFF; display:block; font-size:12px;">🔗 相關連結：</strong><div style="display:flex; flex-wrap:wrap;">${linksHtml}</div></div>`;
                 }
                 
                 let detailsHtml = '';
@@ -636,7 +669,11 @@
             document.getElementById('iti-date').value = currentDate; document.getElementById('iti-period').value = '上午';
             document.getElementById('iti-start').value = ''; document.getElementById('iti-end').value = '';
             document.getElementById('iti-map').value = ''; document.getElementById('iti-traffic').value = '';
-            document.getElementById('iti-notes').value = ''; document.getElementById('iti-links').value = '';
+            document.getElementById('iti-notes').value = ''; 
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`iti-link-title-${i}`).value = '';
+                document.getElementById(`iti-link-url-${i}`).value = '';
+            }
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => cb.checked = true);
             triggerAllAutoResize();
@@ -650,7 +687,24 @@
             document.getElementById('iti-date').value = row.date || currentDate; document.getElementById('iti-period').value = row.period || '上午';
             document.getElementById('iti-start').value = row.startTime || ''; document.getElementById('iti-end').value = row.endTime || '';
             document.getElementById('iti-map').value = row.mapUrl || ''; document.getElementById('iti-traffic').value = row.traffic || '';
-            document.getElementById('iti-notes').value = row.notes || ''; document.getElementById('iti-links').value = row.links || '';
+            document.getElementById('iti-notes').value = row.notes || ''; 
+            let linksList = row.customLinks || [];
+            if (!row.customLinks && row.links) {
+                let lines = row.links.split('\n').filter(l => l.trim());
+                lines.forEach(line => {
+                    let m = line.match(/(https?:\/\/[^\s]+)/);
+                    if (m) {
+                        let u = m[1];
+                        let t = line.replace(u, '').replace(/[:：🔗]/g, '').trim();
+                        linksList.push({ title: t || '官方連結', url: u });
+                    }
+                });
+            }
+            for (let i = 1; i <= 3; i++) {
+                let item = linksList[i - 1] || {};
+                document.getElementById(`iti-link-title-${i}`).value = item.title || '';
+                document.getElementById(`iti-link-url-${i}`).value = item.url || '';
+            }
             let savedTags = (row.tag || '').split(',').map(s=>s.trim());
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => { cb.checked = savedTags.includes(cb.value); });
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => { cb.checked = row.pax && row.pax.includes(cb.value); });
@@ -667,7 +721,19 @@
                 title: title, date: document.getElementById('iti-date').value, period: document.getElementById('iti-period').value,
                 startTime: document.getElementById('iti-start').value, endTime: document.getElementById('iti-end').value,
                 tag: tags.join(', '), mapUrl: document.getElementById('iti-map').value, traffic: document.getElementById('iti-traffic').value,
-                notes: document.getElementById('iti-notes').value, links: document.getElementById('iti-links').value, pax: pax
+                notes: document.getElementById('iti-notes').value, pax: pax,
+                customLinks: (() => {
+                    let arr = [];
+                    for (let i = 1; i <= 3; i++) {
+                        let t = document.getElementById(`iti-link-title-${i}`).value.trim();
+                        let u = document.getElementById(`iti-link-url-${i}`).value.trim();
+                        if (u) {
+                            if (!u.startsWith('http://') && !u.startsWith('https://')) u = 'https://' + u;
+                            arr.push({ title: t || `連結 ${i}`, url: u });
+                        }
+                    }
+                    return arr;
+                })()
             };
             if (id) { data.order = globalItinerary[id].order || 999; db.ref(`itinerary/${id}`).set(data); } 
             else { data.order = 999; db.ref('itinerary').push(data); }
@@ -917,17 +983,36 @@
         function delCategory(type, id) {
             if (confirm('確定刪除？')) { if(type==='shop') shoppingData = shoppingData.filter(c=>c.id!==id); else luggageData = luggageData.filter(c=>c.id!==id); saveList(type); }
         }
-        function openItemModal(type, catId) {
+        function openItemModal(type, catId, itemId = null) {
             document.getElementById('targetListType').value = type; document.getElementById('targetCategoryId').value = catId;
-            document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = '';
+            document.getElementById('targetItemId').value = itemId || '';
+            document.getElementById('itemModalTitle').innerText = itemId ? '編輯物品' : '新增物品';
+            if (itemId) {
+                const data = type === 'shop' ? shoppingData : luggageData;
+                const cat = data.find(c => c.id === catId);
+                const item = cat.items.find(i => i.id === itemId);
+                document.getElementById('itemName').value = item.name || '';
+                document.getElementById('itemNote').value = item.note || '';
+            } else {
+                document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = '';
+            }
             document.getElementById('itemModal').style.display = 'flex';
         }
         function saveListItem() {
             const type = document.getElementById('targetListType').value; const catId = document.getElementById('targetCategoryId').value;
+            const itemId = document.getElementById('targetItemId').value;
             const name = document.getElementById('itemName').value.trim(); const note = document.getElementById('itemNote').value.trim();
             if (!name) return;
             const data = type === 'shop' ? shoppingData : luggageData; const cat = data.find(c => c.id === catId);
-            if (cat) { cat.items.push({ id: 'i_'+Date.now(), name: name, note: note, tags: [], checked: false }); saveList(type); closeModal('itemModal'); }
+            if (cat) {
+                if (itemId) {
+                    const item = cat.items.find(i => i.id === itemId);
+                    if (item) { item.name = name; item.note = note; }
+                } else {
+                    cat.items.push({ id: 'i_'+Date.now(), name: name, note: note, tags: [], checked: false });
+                }
+                saveList(type); closeModal('itemModal');
+            }
         }
         function toggleItem(type, catId, itemId) {
             const data = type === 'shop' ? shoppingData : luggageData; const cat = data.find(c => c.id === catId);
@@ -943,17 +1028,38 @@
             data.forEach(cat => {
                 let itemsHtml = cat.items.map(i => {
                     let note = i.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${i.note}</div>` : '';
-                    return `<div class="item-card"><input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')"><div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div><button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
+                    return `<div class="item-card"><input type="checkbox" class="item-checkbox" ${i.checked?'checked':''} onchange="toggleItem('${type}','${cat.id}','${i.id}')"><div style="flex:1"><div class="item-title ${i.checked?'done':''}">${i.name}</div>${note}</div><div style="display:flex; gap:8px;"><button onclick="openItemModal('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:var(--accent-gold); cursor:pointer;">✏️</button><button onclick="delItem('${type}','${cat.id}','${i.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div></div>`;
                 }).join('');
                 container.innerHTML += `<div style="margin-bottom:20px;"><div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:8px;"><h3>${cat.name}</h3><div><button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px; font-size:11px;">+ 新增</button><button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button></div></div><div>${itemsHtml}</div></div>`;
             });
         }
         function renderShoppingList() { renderGenericList(shoppingData, 'shopping-list-container', 'shop'); }
         function renderLuggageList() { renderGenericList(luggageData, 'luggage-container', 'lug'); }
-        function openTodoModal() { document.getElementById('todoTask').value = ''; document.getElementById('todoDate').value = ''; document.getElementById('todoNote').value = ''; document.getElementById('todoModal').style.display = 'flex'; }
+        function openTodoModal(id = null) {
+            document.getElementById('todoId').value = id || '';
+            document.getElementById('todoModalTitle').innerText = id ? '編輯待辦事項' : '新增待辦事項';
+            if (id) {
+                let t = todoData.find(x => x.id === id);
+                document.getElementById('todoTask').value = t.task || '';
+                document.getElementById('todoDate').value = t.date || '';
+                document.getElementById('todoTime').value = t.time || '';
+                document.getElementById('todoNote').value = t.note || '';
+            } else {
+                document.getElementById('todoTask').value = ''; document.getElementById('todoDate').value = ''; document.getElementById('todoTime').value = ''; document.getElementById('todoNote').value = '';
+            }
+            document.getElementById('todoModal').style.display = 'flex';
+            triggerAllAutoResize();
+        }
         function saveTodo() {
             const task = document.getElementById('todoTask').value.trim(); if(!task) return;
-            db.ref(`users/${currentUserIdentity}/todo`).push({ task: task, date: document.getElementById('todoDate').value, note: document.getElementById('todoNote').value.trim(), checked: false });
+            const id = document.getElementById('todoId').value;
+            const data = { task: task, date: document.getElementById('todoDate').value, time: document.getElementById('todoTime').value, note: document.getElementById('todoNote').value.trim() };
+            if (id) {
+                db.ref(`users/${currentUserIdentity}/todo/${id}`).update(data);
+            } else {
+                data.checked = false;
+                db.ref(`users/${currentUserIdentity}/todo`).push(data);
+            }
             closeModal('todoModal');
         }
         function toggleTodo(id) { let t = todoData.find(x=>x.id===id); if(t) db.ref(`users/${currentUserIdentity}/todo/${id}/checked`).set(!t.checked); }
@@ -962,9 +1068,10 @@
             const container = document.getElementById('todo-container'); container.innerHTML = '';
             if(todoData.length===0) return;
             todoData.forEach(t => {
-                let d = t.date ? `<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">⏳ ${t.date}</span>` : '';
-                let n = t.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:2px;">${t.note}</div>` : '';
-                container.innerHTML += `<div class="item-card"><input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')"><div style="flex:1"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div><button onclick="delTodo('${t.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div>`;
+                let timeStr = t.time ? ` ${t.time}` : '';
+                let d = (t.date || t.time) ? `<span style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; display:inline-block; margin-top:2px;">⏳ ${t.date || ''}${timeStr}</span>` : '';
+                let n = t.note ? `<div style="font-size:11px; color:#94A3B8; margin-top:4px;">${t.note}</div>` : '';
+                container.innerHTML += `<div class="item-card"><input type="checkbox" class="item-checkbox" ${t.checked?'checked':''} onchange="toggleTodo('${t.id}')"><div style="flex:1"><div class="item-title ${t.checked?'done':''}">${t.task}</div>${d}${n}</div><div style="display:flex; gap:8px;"><button onclick="openTodoModal('${t.id}')" style="background:none; border:none; color:var(--accent-gold); cursor:pointer;">✏️</button><button onclick="delTodo('${t.id}')" style="background:none; border:none; color:#64748B; cursor:pointer;">✕</button></div></div>`;
             });
         }
     </script>
