@@ -221,12 +221,21 @@
             </div>
         </div>
 
-        <!-- ================= 購買清單 ================= -->
+        <!-- ================= 購買清單 & 共同筆記 ================= -->
         <div id="view-shopping" class="view-section">
-            <div style="padding:16px;">
+            <div class="list-tabs">
+                <button class="list-tab-btn active" onclick="switchSubView('view-shopping', 'shopping', this)">🎁 聖誕禮物</button>
+                <button class="list-tab-btn" onclick="switchSubView('view-shopping', 'notes', this)">💡 共同筆記</button>
+            </div>
+            <div id="sub-shopping" class="sub-view active">
                 <div class="private-banner" id="banner-shopping">🎁 這是你的私人聖誕購物願望清單</div>
                 <div class="fab" onclick="addCategory('shop', '輸入分類名稱')"></div>
                 <div id="shopping-list-container"></div>
+            </div>
+            <div id="sub-notes" class="sub-view">
+                <div class="private-banner">💡 全員共用的旅遊筆記（不支援圖片）</div>
+                <div class="fab" onclick="openNoteModal()"></div>
+                <div id="notes-container"></div>
             </div>
         </div>
 
@@ -246,17 +255,46 @@
                 <div class="fab" onclick="addCategory('lug', '輸入行李分類')"></div>
                 <div id="luggage-container"></div>
             </div>
+
         </div>
 
         <div class="bottom-nav">
             <div class="nav-item active" onclick="switchView('itinerary', this)"><span class="nav-icon">🎄</span><span>聖誕行程</span></div>
             <div class="nav-item" onclick="switchView('flights', this)"><span class="nav-icon">🦌</span><span>航班/住宿</span></div>
             <div class="nav-item" onclick="switchView('todo', this)"><span class="nav-icon">🧦</span><span>待辦/行李</span></div>
-            <div class="nav-item" onclick="switchView('shopping', this)"><span class="nav-icon">🎁</span><span>聖誕禮物</span></div>
+            <div class="nav-item" onclick="switchView('shopping', this)"><span class="nav-icon">🎁</span><span>禮物/筆記</span></div>
         </div>
     </div>
 
     <!-- ================= 模態框區塊 ================= -->
+
+    <div class="modal-overlay" id="noteEditModal">
+        <div class="modal-box">
+            <h3 id="noteModalTitle">💡 編輯筆記卡片</h3>
+            <input type="hidden" id="editNoteId">
+            <div class="input-group"><label>卡片標題 (必填)</label><input type="text" id="editNoteTitle" placeholder="例如：退稅注意事項"></div>
+            <div class="input-group"><label>筆記內容</label><textarea class="auto-resize" id="editNoteContent" placeholder="請輸入筆記純文字內容..." oninput="autoResize(this)"></textarea></div>
+            <div class="input-group">
+                <label>相關連結 (最多填寫 3 組)</label>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="note-link-title-1" placeholder="名稱 1" style="flex:1;">
+                        <input type="url" id="note-link-url-1" placeholder="網址 1 (https://...)" style="flex:2;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="note-link-title-2" placeholder="名稱 2" style="flex:1;">
+                        <input type="url" id="note-link-url-2" placeholder="網址 2 (https://...)" style="flex:2;">
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="note-link-title-3" placeholder="名稱 3 (選填)" style="flex:1;">
+                        <input type="url" id="note-link-url-3" placeholder="網址 3 (選填)" style="flex:2;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('noteEditModal')">取消</button><button class="btn-save" onclick="saveNoteData()">發佈至公佈欄</button></div>
+        </div>
+    </div>
+
     
     <div class="modal-overlay" id="identity-modal">
         <div class="modal-box">
@@ -461,6 +499,200 @@
         let shoppingData = []; let luggageData = []; let todoData = []; let hotelDataCache = []; let allHotelsData = {}; let parsedFlights = [];
         let flightCombinedData = [];
 
+        let allNotesData = {};
+
+        function listenToNotes() {
+            db.ref('shared_notes').on('value', snapshot => {
+                if (snapshot.exists()) {
+                    allNotesData = snapshot.val();
+                } else {
+                    allNotesData = {};
+                }
+                renderNotes();
+            });
+        }
+
+        function openNoteModal(id = null) {
+            document.getElementById('editNoteId').value = id || '';
+            document.getElementById('noteModalTitle').innerText = id ? '💡 編輯筆記卡片' : '💡 新增筆記卡片';
+            if (id && allNotesData[id]) {
+                let n = allNotesData[id];
+                document.getElementById('editNoteTitle').value = n.title || '';
+                document.getElementById('editNoteContent').value = n.content || '';
+                let linksList = n.customLinks || [];
+                for (let i = 1; i <= 3; i++) {
+                    let item = linksList[i - 1] || {};
+                    document.getElementById(`note-link-title-${i}`).value = item.title || '';
+                    document.getElementById(`note-link-url-${i}`).value = item.url || '';
+                }
+            } else {
+                document.getElementById('editNoteTitle').value = '';
+                document.getElementById('editNoteContent').value = '';
+                for (let i = 1; i <= 3; i++) {
+                    document.getElementById(`note-link-title-${i}`).value = '';
+                    document.getElementById(`note-link-url-${i}`).value = '';
+                }
+            }
+            document.getElementById('noteEditModal').style.display = 'flex';
+            triggerAllAutoResize();
+        }
+
+        function saveNoteData() {
+            let id = document.getElementById('editNoteId').value;
+            let title = document.getElementById('editNoteTitle').value.trim();
+            if (!title) { alert("請輸入筆記標題！"); return; }
+            let content = document.getElementById('editNoteContent').value.trim();
+            
+            let customLinks = [];
+            for (let i = 1; i <= 3; i++) {
+                let t = document.getElementById(`note-link-title-${i}`).value.trim();
+                let u = document.getElementById(`note-link-url-${i}`).value.trim();
+                if (u) {
+                    if (!u.startsWith('http://') && !u.startsWith('https://')) u = 'https://' + u;
+                    customLinks.push({ title: t || `連結 ${i}`, url: u });
+                }
+            }
+            
+            let data = {
+                title: title,
+                content: content,
+                customLinks: customLinks,
+                author: currentUserIdentity,
+                timestamp: Date.now()
+            };
+            if (id) { 
+                data.order = allNotesData[id].order !== undefined ? allNotesData[id].order : 999;
+                db.ref(`shared_notes/${id}`).update(data); 
+            } 
+            else { 
+                data.order = 999;
+                db.ref('shared_notes').push(data); 
+            }
+            closeModal('noteEditModal');
+        }
+
+        function delNote(id) {
+            if (confirm("確定要刪除這張筆記嗎？")) { db.ref(`shared_notes/${id}`).remove(); }
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            let noteArr = [];
+            for (let k in allNotesData) noteArr.push({ id: k, ...allNotesData[k] });
+            noteArr.sort((a,b) => {
+                let oA = a.order !== undefined ? a.order : 9999;
+                let oB = b.order !== undefined ? b.order : 9999;
+                if (oA !== oB) return oA - oB;
+                return (b.timestamp || 0) - (a.timestamp || 0);
+            });
+
+            // Grid for sticky notes
+            let gridHtml = '<div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; align-items: start;">';
+
+            noteArr.forEach(n => {
+                let contentHtml = '';
+                let detailsContent = '';
+                
+                if (n.content) {
+                    let safeContent = n.content.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
+                    detailsContent += `<div style="margin-bottom:8px;">${safeContent}</div>`;
+                }
+                
+                let activeLinks = n.customLinks || [];
+                if (activeLinks.length > 0) {
+                    let linksHtml = activeLinks.map(item => {
+                        return `<a href="${item.url}" target="_blank" style="color:#5D4037; text-decoration:none; display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.4); border:1px solid rgba(141,110,99,0.3); padding:4px 10px; border-radius:8px; font-size:12px; margin-right:8px; margin-top:6px; font-weight:700; box-shadow:0 1px 2px rgba(0,0,0,0.05);">🔗 ${item.title}</a>`;
+                    }).join('');
+                    detailsContent += `<div style="margin-top:6px;"><strong style="color:#3E2723; display:block; font-size:12px;">🔗 相關連結：</strong><div style="display:flex; flex-wrap:wrap;">${linksHtml}</div></div>`;
+                }
+
+                if (detailsContent) {
+                    contentHtml = `<div class="note-content-box" style="display:none; margin-top:12px; padding-top:12px; border-top:1px dashed rgba(93,64,55,0.3); font-size:13px; line-height:1.6; color:#4E342E;">
+                        <div style="font-size:10px; color:rgba(93,64,55,0.8); font-weight:700; margin-bottom:8px;">✍️ 編輯者：${n.author || '未知'}</div>
+                        ${detailsContent}
+                    </div>`;
+                }
+                
+                let initialRotation = Math.random() * 3 - 1.5; 
+                let kraftBg = `background: #d4bda5; background-image: linear-gradient(120deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.05) 100%);`;
+
+                let html = `
+                <div class="note-card" data-id="${n.id}" data-rot="${initialRotation}" style="${kraftBg} border-radius:4px 16px 4px 16px; padding:14px; box-shadow: 2px 5px 12px rgba(0,0,0,0.4); position:relative; display:flex; flex-direction:column; color:#3E2723; transform: rotate(${initialRotation}deg); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(141,110,99,0.3);">
+                    <!-- Washed-out tape on top -->
+                    <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%) rotate(-2deg); width:40px; height:18px; background:rgba(255,255,255,0.3); border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.4);"></div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div class="drag-handle note-drag-handle" style="width:20px; font-size:16px; padding:0; border:none; background:none; cursor:grab; color:rgba(93,64,55,0.5); display:flex; align-items:center; margin-right:4px;">⋮⋮</div>
+                        <h3 style="margin:0; font-size:15px; font-weight:900; flex:1; line-height:1.4; color:#3E2723; text-shadow: 0 1px 1px rgba(255,255,255,0.3);">${n.title}</h3>
+                        <div style="display:flex; flex-direction:column; gap:4px; margin-left:4px;">
+                            <button onclick="openNoteModal('${n.id}')" style="background:none; border:none; color:#5D4037; font-size:14px; cursor:pointer; padding:0;">✏️</button>
+                            <button onclick="delNote('${n.id}')" style="background:none; border:none; color:#5D4037; font-size:14px; cursor:pointer; padding:0; opacity:0.7;">✕</button>
+                        </div>
+                    </div>
+                    
+                    ${contentHtml ? `<button onclick="toggleNoteContent(this)" style="margin-top:12px; background:rgba(255,255,255,0.2); border:1px dashed rgba(93,64,55,0.4); color:#4E342E; border-radius:8px; padding:6px; font-size:12px; font-weight:900; cursor:pointer; width:100%; transition: 0.2s;">👀 看一下</button>` : ''}
+                    ${contentHtml}
+                </div>`;
+                gridHtml += html;
+            });
+            gridHtml += '</div>';
+            container.innerHTML = gridHtml;
+
+            setTimeout(() => {
+                let noteGrid = container.querySelector('div');
+                if(noteGrid) {
+                    if (window.noteSortableInstance) window.noteSortableInstance.destroy();
+                    window.noteSortableInstance = new Sortable(noteGrid, {
+                        handle: '.note-drag-handle',
+                        animation: 150,
+                        delay: 100, delayOnTouchOnly: true,
+                        onEnd: function () {
+                            let items = noteGrid.querySelectorAll('.note-card');
+                            let updates = {};
+                            items.forEach((item, index) => { 
+                                let nId = item.dataset.id;
+                                updates[`shared_notes/${nId}/order`] = index; 
+                            });
+                            db.ref().update(updates);
+                        }
+                    });
+                }
+            }, 50);
+        }
+
+        function toggleNoteContent(btn) {
+            let card = btn.closest('.note-card');
+            let box = btn.nextElementSibling;
+            
+            if(box.style.display === 'none') {
+                // Expand
+                box.style.display = 'block';
+                btn.innerText = '🙈 收起';
+                btn.style.background = 'rgba(0,0,0,0.05)';
+                
+                // Make full width and remove rotation
+                card.style.gridColumn = '1 / -1';
+                card.style.transform = 'rotate(0deg) scale(1.02)';
+                card.style.zIndex = '10';
+            } else {
+                // Collapse
+                box.style.display = 'none';
+                btn.innerText = '👀 看一下';
+                btn.style.background = 'rgba(255,255,255,0.2)';
+                
+                // Restore original column and rotation
+                let originalRot = card.getAttribute('data-rot') || 0;
+                card.style.gridColumn = 'auto';
+                card.style.transform = `rotate(${originalRot}deg) scale(1)`;
+                card.style.zIndex = '1';
+            }
+        }
+
+
+
         const CHECKOUT_SCHEDULE = [
             { date: '11/17', time: '11:00', name: '相鐵 FRESA INN' }, { date: '11/18', time: '10:00', name: '富士暁月湖凪Konagi' },
             { date: '11/19', time: '11:00', name: '湯本富士屋酒店' }, { date: '11/22', time: '10:00', name: '押上 Airbnb' }
@@ -521,6 +753,7 @@
             currentFlightFilter = currentUserIdentity;
             listenToFlights();
             listenToHotels();
+            listenToNotes();
 
             
             const DEFAULT_LUGGAGE = [
@@ -1319,6 +1552,17 @@
                 else luggageData.push({ id: 'c_'+Date.now(), name: name.trim(), items: [] }); saveList(type);
             }
         }
+        function editCategoryName(type, catId) {
+            const data = type === 'shop' ? shoppingData : luggageData;
+            const cat = data.find(c => c.id === catId);
+            if (cat) {
+                const newName = prompt("編輯分類名稱", cat.name);
+                if (newName && newName.trim() !== '') {
+                    cat.name = newName.trim();
+                    saveList(type);
+                }
+            }
+        }
         function delCategory(type, id) {
             if (confirm('確定刪除？')) { if(type==='shop') shoppingData = shoppingData.filter(c=>c.id!==id); else luggageData = luggageData.filter(c=>c.id!==id); saveList(type); }
         }
@@ -1434,12 +1678,16 @@
                             </div>`;
                 }).join('');
                 
-                container.innerHTML += `<div style="margin-bottom:20px;">
-                                            <div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                                                <h3>${cat.name}</h3>
-                                                <div>
+                container.innerHTML += `<div class="category-block" data-catid="${cat.id}" style="margin-bottom:20px; background:rgba(0,0,0,0.1); padding:10px; border-radius:12px;">
+                                            <div class="category-header" style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
+                                                <div style="display:flex; align-items:center; gap:8px;">
+                                                    <div class="drag-handle cat-drag-handle" style="width:20px; font-size:18px; padding:0; border:none; background:none; cursor:grab; color:rgba(255,255,255,0.2); display:flex; align-items:center;">⋮⋮</div>
+                                                    <h3>${cat.name}</h3>
+                                                    <button onclick="editCategoryName('${type}', '${cat.id}')" style="background:none; border:none; color:var(--text-light); cursor:pointer; font-size:12px;">✏️</button>
+                                                </div>
+                                                <div style="display:flex; gap:6px;">
                                                     <button onclick="openItemModal('${type}','${cat.id}')" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; border-radius:6px; padding:2px 8px; font-size:11px;">+ 新增</button>
-                                                    <button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350;">🗑️</button>
+                                                    <button onclick="delCategory('${type}','${cat.id}')" style="background:none; border:none; color:#EF5350; font-size:12px; padding:0 4px;">🗑️</button>
                                                 </div>
                                             </div>
                                             <div class="sortable-${type}" data-catid="${cat.id}">
@@ -1450,6 +1698,19 @@
             
             // Initialize Sortable for items across categories
             setTimeout(() => {
+                if (window[`catSortable_${type}`]) window[`catSortable_${type}`].destroy();
+                window[`catSortable_${type}`] = new Sortable(container, {
+                    handle: '.cat-drag-handle',
+                    animation: 150,
+                    delay: 100, delayOnTouchOnly: true,
+                    onEnd: function (evt) {
+                        const data = type === 'shop' ? shoppingData : luggageData;
+                        let movedCat = data.splice(evt.oldIndex, 1)[0];
+                        data.splice(evt.newIndex, 0, movedCat);
+                        saveList(type);
+                    }
+                });
+                
                 document.querySelectorAll(`.sortable-${type}`).forEach(el => {
                     new Sortable(el, {
                         group: type,
