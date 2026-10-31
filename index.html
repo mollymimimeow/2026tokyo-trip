@@ -394,7 +394,13 @@
                 <div class="input-group"><label>誰要的 (將顯示為標籤)</label><input type="text" id="shopWho" placeholder="例如：自己、雅、朋友代購"></div>
                 <div class="input-group"><label>哪裡買</label><input type="text" id="shopWhere" placeholder="例如：唐吉訶德、藥妝店"></div>
                 <div style="display:flex; gap:8px;">
-                    <div class="input-group" style="flex:1;"><label>預算</label><input type="number" id="shopBudget" placeholder="例如：5000"></div>
+                    <div class="input-group" style="flex:1;">
+                        <label>預算</label>
+                        <div style="display:flex; gap:4px;">
+                            <input type="number" id="shopBudget" style="flex:2;" placeholder="例如：5000">
+                            <select id="shopBudgetCurrency" style="flex:1; padding:0 2px; border-radius:6px; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.2);"><option value="JPY">日幣</option><option value="TWD">台幣</option></select>
+                        </div>
+                    </div>
                     <div class="input-group" style="flex:1;">
                         <label>買到價格</label>
                         <div style="display:flex; gap:4px;">
@@ -1295,14 +1301,15 @@
                     document.getElementById('shopWho').value = item.shopWho || '';
                     document.getElementById('shopWhere').value = item.shopWhere || '';
                     document.getElementById('shopBudget').value = item.shopBudget || '';
+                    document.getElementById('shopBudgetCurrency').value = item.shopBudgetCurrency || 'JPY';
                     document.getElementById('shopPrice').value = item.shopPrice || '';
                     document.getElementById('shopCurrency').value = item.shopCurrency || 'JPY';
                 }
             } else {
                 document.getElementById('itemName').value = ''; document.getElementById('itemNote').value = '';
                 document.getElementById('shopWho').value = ''; document.getElementById('shopWhere').value = '';
-                document.getElementById('shopBudget').value = ''; document.getElementById('shopPrice').value = '';
-                document.getElementById('shopCurrency').value = 'JPY';
+                document.getElementById('shopBudget').value = ''; document.getElementById('shopBudgetCurrency').value = 'JPY';
+                document.getElementById('shopPrice').value = ''; document.getElementById('shopCurrency').value = 'JPY';
             }
             document.getElementById('itemModal').style.display = 'flex';
             triggerAllAutoResize();
@@ -1318,6 +1325,7 @@
                 extra.shopWho = document.getElementById('shopWho').value.trim();
                 extra.shopWhere = document.getElementById('shopWhere').value.trim();
                 extra.shopBudget = document.getElementById('shopBudget').value.trim();
+                extra.shopBudgetCurrency = document.getElementById('shopBudgetCurrency').value;
                 extra.shopPrice = document.getElementById('shopPrice').value.trim();
                 extra.shopCurrency = document.getElementById('shopCurrency').value;
             }
@@ -1367,7 +1375,7 @@
                         let tags = [];
                         if (i.shopWho) tags.push(`<span class="tag-pill" style="background:rgba(255,152,0,0.25); border-color:rgba(255,152,0,0.5);">${i.shopWho}</span>`);
                         if (i.shopWhere) tags.push(`<span style="font-size:11px; color:#94A3B8;">📍 ${i.shopWhere}</span>`);
-                        if (i.shopBudget) tags.push(`<span style="font-size:11px; color:#94A3B8;">💰 預算: ${i.shopBudget}</span>`);
+                        if (i.shopBudget) tags.push(`<span style="font-size:11px; color:#94A3B8;">💰 預算: ${i.shopBudget} ${i.shopBudgetCurrency || 'JPY'}</span>`);
                         if (i.shopPrice) tags.push(`<span style="font-size:11px; color:#81C784;">✅ 買到: ${i.shopPrice} ${i.shopCurrency || 'JPY'}</span>`);
                         if (tags.length > 0) extraHtml = `<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">${tags.join('')}</div>`;
                     }
