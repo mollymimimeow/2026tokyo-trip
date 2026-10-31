@@ -103,7 +103,12 @@
         /* Auto-resizing textarea class */
         .auto-resize { overflow: hidden; resize: none; min-height: 40px; }
         
-        .input-group input, .input-group textarea, .input-group select { width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; font-size: 13px; background: rgba(0,0,0,0.3); color: white; font-family: inherit; }
+        .input-group input, .input-group textarea, .input-group select { 
+            width: 100%; padding: 10px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; 
+            font-size: 13px; background: rgba(0,0,0,0.3); color: white; font-family: inherit; 
+            box-sizing: border-box; -webkit-appearance: none; appearance: none;
+        }
+        input[type="time"] { min-height: 42px; text-align: center; }
         .input-group input:focus, .input-group textarea:focus, .input-group select:focus { outline: 2px solid var(--accent-gold); }
         .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; }
         .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: white; background: rgba(255,255,255,0.05); padding: 6px 10px; border-radius: 8px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;}
@@ -257,9 +262,9 @@
                     <select id="iti-period"><option value="早餐">早餐</option><option value="上午">上午</option><option value="午餐">午餐</option><option value="下午">下午</option><option value="晚餐">晚餐</option><option value="晚上">晚上</option></select>
                 </div>
             </div>
-            <div style="display:flex; gap:8px;">
-                <div class="input-group" style="flex:1;"><label>開始時間</label><input type="time" id="iti-start"></div>
-                <div class="input-group" style="flex:1;"><label>結束時間</label><input type="time" id="iti-end"></div>
+            <div style="display:flex; gap:12px; margin-bottom:12px;">
+                <div class="input-group" style="flex:1 1 0; min-width:0; margin-bottom:0;"><label>開始時間</label><input type="time" id="iti-start"></div>
+                <div class="input-group" style="flex:1 1 0; min-width:0; margin-bottom:0;"><label>結束時間</label><input type="time" id="iti-end"></div>
             </div>
             <div class="input-group">
                 <label>主題標籤 (可複選)</label>
@@ -275,9 +280,9 @@
                 <div class="tag-select-grid" id="iti-pax-grid"></div>
             </div>
             <div class="input-group"><label>Google Map 連結</label><input type="url" id="iti-map" placeholder="https://maps.app.goo.gl/..."></div>
-            <div class="input-group"><label>行程內容</label><textarea class="auto-resize" id="iti-notes" placeholder="記得帶..."></textarea></div>
-            <div class="input-group"><label>細項與筆記 (交通路線/其他備註)</label><textarea class="auto-resize" id="iti-traffic" placeholder="搭乘地鐵..."></textarea></div>
-            <div class="input-group"><label>相關連結 (多個連結請換行)</label><textarea class="auto-resize" id="iti-links" placeholder="餐廳官網網址..."></textarea></div>
+            <div class="input-group"><label>行程內容</label><textarea class="auto-resize" id="iti-notes" placeholder="例如：名店、需現場排隊..." oninput="autoResize(this)"></textarea></div>
+            <div class="input-group"><label>細項與筆記 (交通路線/其他備註)</label><textarea class="auto-resize" id="iti-traffic" placeholder="搭乘地鐵、預約號碼等..." oninput="autoResize(this)"></textarea></div>
+            <div class="input-group"><label>相關連結 (多個連結請換行)</label><textarea class="auto-resize" id="iti-links" placeholder="https://... (多個連結請換行)" oninput="autoResize(this)"></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('itinerary-modal')">取消</button><button class="btn-save" onclick="saveItinerary()">送出願望</button></div>
         </div>
     </div>
@@ -287,7 +292,7 @@
             <h3>新增待辦事項</h3>
             <div class="input-group"><label>待辦事項 (必填)</label><input type="text" id="todoTask"></div>
             <div class="input-group"><label>截止日期 (選填)</label><input type="date" id="todoDate"></div>
-            <div class="input-group"><label>備註 (選填)</label><textarea class="auto-resize" id="todoNote"></textarea></div>
+            <div class="input-group"><label>備註 (選填)</label><textarea class="auto-resize" id="todoNote" oninput="autoResize(this)"></textarea></div>
             <div class="modal-actions"><button class="btn-cancel" onclick="closeModal('todoModal')">取消</button><button class="btn-save" onclick="saveTodo()">儲存</button></div>
         </div>
     </div>
@@ -305,13 +310,17 @@
 
     <script>
         // Auto-resize textarea function
-        document.addEventListener('input', function (event) {
-            if (event.target.tagName.toLowerCase() !== 'textarea') return;
-            autoResize(event.target);
-        }, false);
         function autoResize(el) {
+            if (!el) return;
             el.style.height = 'auto';
-            el.style.height = (el.scrollHeight + 2) + 'px';
+            let newH = el.scrollHeight;
+            if (newH < 44) newH = 44;
+            el.style.height = (newH + 4) + 'px';
+        }
+        function triggerAllAutoResize() {
+            setTimeout(() => {
+                triggerAllAutoResize();
+            }, 50);
         }
 
         const snowContainer = document.getElementById('snow-container');
@@ -367,9 +376,11 @@
                 renderHotels();
             });
 
+            // 確保無論是否已登入，參與成員選單都會先生成
+            renderMemberSelectors();
+
             currentUserIdentity = localStorage.getItem('tokyo_identity_26');
             if (!currentUserIdentity) {
-                renderMemberSelectors();
                 document.getElementById('identity-modal').style.display = 'flex';
                 document.getElementById('loading').style.display = 'none';
             } else {
@@ -620,7 +631,7 @@
             document.getElementById('iti-notes').value = ''; document.getElementById('iti-links').value = '';
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => cb.checked = true);
-            document.querySelectorAll('.auto-resize').forEach(el => autoResize(el));
+            triggerAllAutoResize();
             document.getElementById('iti-modal-title').innerText = '新增行程';
             document.getElementById('itinerary-modal').style.display = 'flex';
         }
@@ -635,7 +646,7 @@
             let savedTags = (row.tag || '').split(',').map(s=>s.trim());
             document.querySelectorAll('input[name="iti-tag"]').forEach(cb => { cb.checked = savedTags.includes(cb.value); });
             document.querySelectorAll('input[name="iti-pax"]').forEach(cb => { cb.checked = row.pax && row.pax.includes(cb.value); });
-            document.querySelectorAll('.auto-resize').forEach(el => autoResize(el));
+            triggerAllAutoResize();
             document.getElementById('iti-modal-title').innerText = '編輯行程'; document.getElementById('itinerary-modal').style.display = 'flex';
         }
 
