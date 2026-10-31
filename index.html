@@ -224,7 +224,7 @@
         <!-- ================= 購買清單 ================= -->
         <div id="view-shopping" class="view-section">
             <div style="padding:16px;">
-                <div class="private-banner">🎁 這是你的私人聖誕購物願望清單</div>
+                <div class="private-banner" id="banner-shopping">🎁 這是你的私人聖誕購物願望清單</div>
                 <div class="fab" onclick="addCategory('shop', '輸入分類名稱')"></div>
                 <div id="shopping-list-container"></div>
             </div>
@@ -237,12 +237,12 @@
                 <button class="list-tab-btn" onclick="switchSubView('view-todo', 'luggage', this)">🧳 行李清單</button>
             </div>
             <div id="sub-todo" class="sub-view active">
-                <div class="private-banner">📝 這是你的私人待辦事項（已加密儲存於雪地雲端）</div>
+                <div class="private-banner" id="banner-todo">📝 這是你的私人待辦事項</div>
                 <div class="fab" onclick="openTodoModal()"></div>
                 <div id="todo-container"></div>
             </div>
             <div id="sub-luggage" class="sub-view">
-                <div class="private-banner">🧳 這是你的私人行李清單</div>
+                <div class="private-banner" id="banner-luggage">🧳 這是你的私人行李清單</div>
                 <div class="fab" onclick="addCategory('lug', '輸入行李分類')"></div>
                 <div id="luggage-container"></div>
             </div>
@@ -511,6 +511,9 @@
 
         function startApp() {
             document.getElementById('user-badge').innerText = '🎅 ' + currentUserIdentity;
+            document.getElementById('banner-shopping').innerText = '🎁 這是 ' + currentUserIdentity + ' 的聖誕購物清單';
+            document.getElementById('banner-todo').innerText = '📝 這是 ' + currentUserIdentity + ' 的待辦事項';
+            document.getElementById('banner-luggage').innerText = '🧳 這是 ' + currentUserIdentity + ' 的行李清單';
             document.getElementById('loading').innerText = '正在從聖誕雲端載入行程資料...';
             document.getElementById('loading').style.display = 'block';
 
